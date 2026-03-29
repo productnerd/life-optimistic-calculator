@@ -20,6 +20,7 @@ function App() {
             (s: any) => ({
               ...s,
               annualGrowthRate: s.annualGrowthRate ?? 3,
+              linkedTo: s.linkedTo ?? null,
             })
           );
         }

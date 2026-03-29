@@ -2,7 +2,8 @@ export interface IncomeStream {
   name: string;
   monthlyAmount: number;
   annualGrowthRate: number; // % per year
-  startsInYears: number; // 0 = now, 3 = starts in 3 years
+  startsInYears: number; // 0 = now, 3 = starts in 3 years (ignored if linkedTo is set)
+  linkedTo: string | null; // null = manual start, "dreamHome" | "holidayHome" | "business-0" etc.
 }
 
 export interface ExpenseCategory {

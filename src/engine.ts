@@ -127,9 +127,27 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     const salaryGrowthMultiplier = Math.pow(1 + inputs.salaryGrowthRate / 100, y);
 
     // Additional income with per-stream growth and start year (continues after retirement)
+    // If linkedTo an asset, income starts when that asset is acquired
     const additionalIncomeTotal = inputs.additionalIncome.reduce(
       (sum, s) => {
-        const startYear = s.startsInYears ?? 0;
+        let startYear: number;
+        if (s.linkedTo) {
+          if (s.linkedTo === "dreamHome") {
+            if (houseBoughtYear < 0) return sum; // not bought yet
+            startYear = houseBoughtYear;
+          } else if (s.linkedTo === "holidayHome") {
+            if (holidayHomeBoughtYear < 0) return sum;
+            startYear = holidayHomeBoughtYear;
+          } else if (s.linkedTo.startsWith("business-")) {
+            // Businesses start in year 2
+            if (y < 2) return sum;
+            startYear = 2;
+          } else {
+            startYear = s.startsInYears ?? 0;
+          }
+        } else {
+          startYear = s.startsInYears ?? 0;
+        }
         if (y < startYear) return sum;
         const yearsActive = y - startYear;
         return sum + s.monthlyAmount * 12 * Math.pow(1 + s.annualGrowthRate / 100, yearsActive);

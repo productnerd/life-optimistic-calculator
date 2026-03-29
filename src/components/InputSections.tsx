@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import {
   Card,
   CardContent,
@@ -18,6 +19,7 @@ import {
   Plane,
   ShoppingBag,
   Briefcase,
+  Link,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +39,22 @@ export function InputSections({
 }: InputSectionsProps) {
   const update = (partial: Partial<DreamInputs>) =>
     onChange({ ...inputs, ...partial });
+
+  const businessesRef = useRef<HTMLDivElement>(null);
+  const housingRef = useRef<HTMLDivElement>(null);
+
+  // Build linkable assets list
+  const linkableAssets: { value: string; label: string }[] = [];
+  if (inputs.dreamHome.description || inputs.dreamHome.estimatedPrice) {
+    linkableAssets.push({ value: "dreamHome", label: "Dream Home" });
+  }
+  if (inputs.holidayHome?.estimatedPrice) {
+    linkableAssets.push({ value: "holidayHome", label: "Holiday Home" });
+  }
+  inputs.businesses.forEach((b, i) => {
+    linkableAssets.push({ value: `business-${i}`, label: b.description || `Business ${i + 1}` });
+  });
+  const hasLinkableAssets = linkableAssets.length > 0;
 
   const updateAIItem = (
     key: keyof DreamInputs,
@@ -244,7 +262,7 @@ export function InputSections({
                   update({
                     additionalIncome: [
                       ...inputs.additionalIncome,
-                      { name: "", monthlyAmount: 0, annualGrowthRate: 3, startsInYears: 0 },
+                      { name: "", monthlyAmount: 0, annualGrowthRate: 3, startsInYears: 0, linkedTo: null },
                     ],
                   })
                 }
@@ -307,28 +325,6 @@ export function InputSections({
                       %/yr
                     </span>
                   </div>
-                  <div className="relative w-24">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                      in
-                    </span>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={stream.startsInYears || ""}
-                      onChange={(e) => {
-                        const updated = [...inputs.additionalIncome];
-                        updated[i] = {
-                          ...updated[i],
-                          startsInYears: Number(e.target.value),
-                        };
-                        update({ additionalIncome: updated });
-                      }}
-                      className="pl-8 pr-8"
-                    />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                      yrs
-                    </span>
-                  </div>
                   <Button
                     size="icon"
                     variant="ghost"
@@ -342,6 +338,77 @@ export function InputSections({
                   >
                     <X className="h-4 w-4" />
                   </Button>
+                </div>
+                {/* Linked asset or manual start year */}
+                <div className="flex items-center gap-2 pl-1">
+                  <Link className="h-3 w-3 text-muted-foreground shrink-0" />
+                  {hasLinkableAssets ? (
+                    <select
+                      className="flex-1 rounded-md border border-input bg-background px-2 py-1 text-xs"
+                      value={stream.linkedTo ?? ""}
+                      onChange={(e) => {
+                        const updated = [...inputs.additionalIncome];
+                        const val = e.target.value || null;
+                        updated[i] = { ...updated[i], linkedTo: val };
+                        update({ additionalIncome: updated });
+                      }}
+                    >
+                      <option value="">Manual start (in {stream.startsInYears || 0} yrs)</option>
+                      {linkableAssets.map((a) => (
+                        <option key={a.value} value={a.value}>{a.label}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className="text-xs text-muted-foreground flex-1">No properties or businesses yet</span>
+                  )}
+                  {!stream.linkedTo && (
+                    <div className="relative w-20">
+                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">in</span>
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        value={stream.startsInYears || ""}
+                        onChange={(e) => {
+                          const updated = [...inputs.additionalIncome];
+                          updated[i] = { ...updated[i], startsInYears: Number(e.target.value) };
+                          update({ additionalIncome: updated });
+                        }}
+                        className="pl-6 pr-6 h-7 text-xs"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">yr</span>
+                    </div>
+                  )}
+                  {!hasLinkableAssets && (
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 text-xs px-2"
+                        onClick={() => {
+                          housingRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }}
+                      >
+                        + Property
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 text-xs px-2"
+                        onClick={() => {
+                          // Create a business and scroll to it
+                          update({
+                            businesses: [
+                              ...inputs.businesses,
+                              { description: "", estimatedPrice: null, isLoading: false },
+                            ],
+                          });
+                          setTimeout(() => businessesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
+                        }}
+                      >
+                        + Business
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -432,7 +499,7 @@ export function InputSections({
       </Card>
 
       {/* Housing */}
-      <Card>
+      <Card ref={housingRef}>
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg uppercase tracking-wide">
             <Home className="h-5 w-5 text-primary" />
@@ -648,7 +715,7 @@ export function InputSections({
       </Card>
 
       {/* Businesses */}
-      <Card>
+      <Card ref={businessesRef}>
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg uppercase tracking-wide">
             <Briefcase className="h-5 w-5 text-primary" />
