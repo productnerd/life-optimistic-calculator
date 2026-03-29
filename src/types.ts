@@ -25,6 +25,10 @@ export interface DreamInputs {
   partnerSalary: number | null; // null = no partner, 0+ = partner salary
   partnerSalaryGrowth: number;
 
+  // Tax & Pension
+  effectiveTaxRate: number; // % effective tax rate (auto-set from country, user can override)
+  pensionContributionPercent: number; // % of gross salary to pension
+
   // Investment
   investmentPercentage: number; // % of salary invested
   expectedReturn: number; // % annual return
@@ -86,6 +90,8 @@ export interface YearlySnapshot {
   investmentIncome: number;
   totalIncome: number;
   // Expenses
+  taxes: number;
+  pensionContribution: number;
   housing: number; // rent or mortgage
   carExpenses: number;
   kidsCosts: number;
@@ -122,7 +128,9 @@ export function createDefaultInputs(): DreamInputs {
     targetRetireAge: 55,
     currentSavings: 5000,
     currentInvestments: 0,
-    country: "Europe",
+    country: "Netherlands",
+    effectiveTaxRate: 37,
+    pensionContributionPercent: 5,
     annualSalary: 50000,
     salaryGrowthRate: 2,
     additionalIncome: [],

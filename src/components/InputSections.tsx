@@ -138,6 +138,54 @@ export function InputSections({
             description="Expected yearly raise"
           />
           <Separator />
+          {/* Country & Tax */}
+          <div>
+            <p className="text-sm font-medium mb-2">Country</p>
+            <select
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={inputs.country}
+              onChange={(e) => {
+                const country = e.target.value;
+                const taxRates: Record<string, number> = {
+                  "Netherlands": 37, "Germany": 35, "France": 30, "UK": 27,
+                  "Spain": 24, "Italy": 33, "Portugal": 23, "Belgium": 40,
+                  "Sweden": 32, "Denmark": 36, "Norway": 33, "Finland": 31,
+                  "Ireland": 27, "Austria": 34, "Switzerland": 22, "USA": 24,
+                  "Canada": 26, "Australia": 24, "Other": 30,
+                };
+                update({ country, effectiveTaxRate: taxRates[country] ?? 30 });
+              }}
+            >
+              {["Netherlands", "Germany", "France", "UK", "Spain", "Italy", "Portugal", "Belgium",
+                "Sweden", "Denmark", "Norway", "Finland", "Ireland", "Austria", "Switzerland",
+                "USA", "Canada", "Australia", "Other"].map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <SliderField
+              label="Effective Tax Rate"
+              value={inputs.effectiveTaxRate}
+              onChange={(v) => update({ effectiveTaxRate: v })}
+              min={0}
+              max={55}
+              step={1}
+              unit="%"
+              description="Adjust based on your bracket"
+            />
+            <SliderField
+              label="Pension Contribution"
+              value={inputs.pensionContributionPercent}
+              onChange={(v) => update({ pensionContributionPercent: v })}
+              min={0}
+              max={20}
+              step={0.5}
+              unit="%"
+              description="% of gross salary"
+            />
+          </div>
+          <Separator />
           {/* Partner Salary */}
           <div className="flex items-center justify-between">
             <div>

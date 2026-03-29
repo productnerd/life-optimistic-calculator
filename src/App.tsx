@@ -72,6 +72,15 @@ function App() {
         if (parsed.miniRetirementStopSideIncome === undefined) {
           parsed.miniRetirementStopSideIncome = false;
         }
+        if (parsed.effectiveTaxRate === undefined) {
+          parsed.effectiveTaxRate = 37;
+        }
+        if (parsed.pensionContributionPercent === undefined) {
+          parsed.pensionContributionPercent = 5;
+        }
+        if (parsed.country === "Europe") {
+          parsed.country = "Netherlands";
+        }
         return { ...createDefaultInputs(), ...parsed };
       }
     } catch {}
@@ -108,7 +117,7 @@ function App() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border/50 glass-card sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="w-full px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center">
               <span className="text-xl">✨</span>
@@ -117,7 +126,7 @@ function App() {
               <h1 className="text-lg font-bold tracking-tight" style={{ fontFamily: "'Fraunces', serif" }}>
                 Life Optimistic Calculator
               </h1>
-              <p className="text-xs text-muted-foreground italic" style={{ fontFamily: "'Libre Baskerville', serif", fontSize: '14px' }}>
+              <p className="text-xs text-muted-foreground italic" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                 your dream life costs less than you think
               </p>
             </div>
@@ -127,7 +136,7 @@ function App() {
       </header>
 
       {/* Hero */}
-      <section className="max-w-7xl mx-auto px-4 py-12 text-center">
+      <section className="w-full px-6 py-12 text-center">
         <h2
           className="text-4xl md:text-5xl font-black tracking-tight text-foreground"
           style={{ fontFamily: "'Fraunces', serif" }}
@@ -140,18 +149,18 @@ function App() {
         </h2>
         <p
           className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto italic"
-          style={{ fontFamily: "'Libre Baskerville', serif", fontSize: '20px' }}
+          style={{ fontFamily: "'DM Sans', sans-serif" }}
         >
           Most people overestimate what they need.
         </p>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="w-full px-6">
         <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
       </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="w-full px-6 py-8">
         <div className="grid lg:grid-cols-[1fr_1.2fr] gap-8">
           {/* Left: Inputs */}
           <div>
@@ -164,12 +173,6 @@ function App() {
 
           {/* Right: Results */}
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <h3
-              className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4"
-              style={{ fontFamily: "'Libre Baskerville', serif", fontSize: '18px', textTransform: 'none', letterSpacing: '0.02em' }}
-            >
-              Your Financial Journey
-            </h3>
             <ResultsDashboard result={result} inputs={inputs} />
           </div>
         </div>
@@ -177,7 +180,7 @@ function App() {
 
       {/* Footer */}
       <footer className="border-t border-border/50 mt-16 py-8 text-center text-sm text-muted-foreground">
-        <p className="flex items-center justify-center gap-1" style={{ fontFamily: "'Libre Baskerville', serif", fontSize: '18px' }}>
+        <p className="flex items-center justify-center gap-1" style={{ fontFamily: "'DM Sans', sans-serif" }}>
           Made with <Heart className="h-4 w-4 text-primary fill-primary" /> to
           help people realize their dreams are closer than they think
         </p>

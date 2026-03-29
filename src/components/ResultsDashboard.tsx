@@ -89,8 +89,10 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
   // Prepare chart data
   const incomeExpenseData = yearlySnapshots.map((s) => ({
     age: s.age,
-    Salary: s.salary,
+    "Net Salary": s.salary,
     "Investment Income": s.investmentIncome,
+    Taxes: -s.taxes,
+    Pension: -s.pensionContribution,
     Housing: -s.housing,
     Car: -s.carExpenses,
     Kids: -s.kidsCosts,
@@ -134,7 +136,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
             <p className="text-4xl font-bold text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
               {dreamLifeAchievableAge ?? "—"}
             </p>
-            <p className="text-sm text-primary/80 mt-1" style={{ fontFamily: "'Libre Baskerville', serif", fontStyle: 'italic' }}>
+            <p className="text-sm text-primary/80 mt-1" >
               {dreamLifeAchievableAge
                 ? `In ${dreamLifeAchievableAge - yearlySnapshots[0].age} years — you can live your dream!`
                 : "Not yet reachable with current settings — try adjusting inputs"}
@@ -177,7 +179,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
               <p className="text-4xl font-bold text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
                 {dreamEntrepreneurialAge}
               </p>
-              <p className="text-sm text-primary/70 mt-1" style={{ fontFamily: "'Libre Baskerville', serif", fontStyle: 'italic' }}>
+              <p className="text-sm text-primary/70 mt-1" >
                 In {dreamEntrepreneurialAge - yearlySnapshots[0].age} years — including your businesses!
               </p>
               {expandedCard === "entrepreneur" && (() => {
@@ -365,7 +367,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
             <Badge className="bg-primary/20 text-primary border-primary/30 text-sm px-3 py-1">
               {tier.label}
             </Badge>
-            <p className="text-sm text-muted-foreground" style={{ fontFamily: "'Libre Baskerville', serif", fontSize: '16px' }}>{tier.message}</p>
+            <p className="text-sm text-muted-foreground" >{tier.message}</p>
           </div>
           {/* Tier scale */}
           <div className="mt-4 flex items-center gap-1">
@@ -483,7 +485,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
                 {/* Income (positive) */}
                 <Area
                   type="monotone"
-                  dataKey="Salary"
+                  dataKey="Net Salary"
                   stackId="income"
                   fill="#8B9E6B"
                   stroke="#8B9E6B"
@@ -498,6 +500,22 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
                   fillOpacity={0.6}
                 />
                 {/* Expenses (negative) */}
+                <Area
+                  type="monotone"
+                  dataKey="Taxes"
+                  stackId="expenses"
+                  fill="#9333ea"
+                  stroke="#9333ea"
+                  fillOpacity={0.5}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="Pension"
+                  stackId="expenses"
+                  fill="#6366f1"
+                  stroke="#6366f1"
+                  fillOpacity={0.4}
+                />
                 <Area
                   type="monotone"
                   dataKey="Housing"

@@ -146,7 +146,12 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     // No salary during mini-retirement or after retirement
     // Side income stops during mini-retirement only if flag is set
     const sideIncomeMultiplier = inputs.miniRetirementStopSideIncome ? workingFraction : 1;
-    const salary = baseSalary * workingFraction + additionalIncomeTotal * sideIncomeMultiplier + partnerIncome;
+    const grossSalary = baseSalary * workingFraction + additionalIncomeTotal * sideIncomeMultiplier + partnerIncome;
+
+    // Taxes and pension (only on earned income, not investment income)
+    const taxes = grossSalary * (inputs.effectiveTaxRate / 100);
+    const pensionContribution = (baseSalary * workingFraction + partnerIncome) * (inputs.pensionContributionPercent / 100);
+    const salary = grossSalary - taxes - pensionContribution;
 
     const investmentIncome = portfolioValue * (inputs.expectedReturn / 100);
 
@@ -317,6 +322,8 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       salary: Math.round(salary),
       investmentIncome: Math.round(investmentIncome),
       totalIncome: Math.round(totalIncome),
+      taxes: Math.round(taxes),
+      pensionContribution: Math.round(pensionContribution),
       housing: Math.round(housing),
       carExpenses: Math.round(carExpenses),
       kidsCosts: Math.round(kidsCosts),
