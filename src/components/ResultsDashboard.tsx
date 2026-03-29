@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -18,12 +19,14 @@ import {
   Line,
   ReferenceLine,
   ReferenceDot,
+  Label as RechartsLabel,
 } from "recharts";
-import { Target, TrendingUp, Calendar, Coins } from "lucide-react";
-import type { SimulationResult } from "@/types";
+import { Calendar, Coins, Star, ShoppingBag, Info, ChevronDown } from "lucide-react";
+import type { SimulationResult, DreamInputs } from "@/types";
 
 interface ResultsDashboardProps {
   result: SimulationResult;
+  inputs: DreamInputs;
 }
 
 function formatCurrency(n: number): string {
@@ -77,10 +80,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export function ResultsDashboard({ result }: ResultsDashboardProps) {
-  const { yearlySnapshots, totalLifetimeCost, yearsToGoal, goalReachedAge, dreamLifeAnnualCost } = result;
+export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
+  const { yearlySnapshots, totalLifetimeCost, dreamLifeAnnualCost, dreamLifeAchievableAge, dreamEntrepreneurialAge, totalAssetsCost, totalKidsCost } = result;
   const tier = getLifestyleTier(dreamLifeAnnualCost);
-  const goalAmount = dreamLifeAnnualCost * 25;
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const toggleCard = (id: string) => setExpandedCard(prev => prev === id ? null : id);
 
   // Prepare chart data
   const incomeExpenseData = yearlySnapshots.map((s) => ({
@@ -91,6 +95,7 @@ export function ResultsDashboard({ result }: ResultsDashboardProps) {
     Car: -s.carExpenses,
     Kids: -s.kidsCosts,
     Living: -s.livingExpenses,
+    Travel: -s.travelCosts,
     Other: -(s.hobbyCosts + s.otherExpenses),
   }));
 
@@ -108,82 +113,259 @@ export function ResultsDashboard({ result }: ResultsDashboardProps) {
   return (
     <div className="space-y-6">
       {/* Hero Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-green-700 mb-1">
-              <Target className="h-4 w-4" />
-              <span className="text-xs font-medium uppercase tracking-wider">
-                Financial Freedom At
-              </span>
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="glass-card stat-card col-span-2 border-primary/20" onClick={() => toggleCard("dream")}>
+          <CardContent>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2 text-primary">
+                <Star className="h-4 w-4" />
+                <span className="text-xs font-medium uppercase tracking-wider">
+                  Dream Life Achievable At
+                </span>
+                <span className="group relative cursor-help" onClick={(e) => e.stopPropagation()}>
+                  <Info className="h-3.5 w-3.5 text-primary/60" />
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-lg bg-popover text-popover-foreground text-xs p-2.5 hidden group-hover:block z-50 border border-border shadow-lg">
+                    The earliest age when you've bought your home & car and your income covers all your expenses.
+                  </span>
+                </span>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-primary/40 transition-transform duration-300 ${expandedCard === "dream" ? "rotate-180" : ""}`} />
             </div>
-            <p className="text-3xl font-bold text-green-800">
-              {goalReachedAge}
+            <p className="text-4xl font-bold text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
+              {dreamLifeAchievableAge ?? "—"}
             </p>
-            <p className="text-xs text-green-600 mt-1">
-              In {yearsToGoal} years
+            <p className="text-sm text-primary/80 mt-1" style={{ fontFamily: "'Libre Baskerville', serif", fontStyle: 'italic' }}>
+              {dreamLifeAchievableAge
+                ? `In ${dreamLifeAchievableAge - yearlySnapshots[0].age} years — you can live your dream!`
+                : "Not yet reachable with current settings — try adjusting inputs"}
             </p>
+            {expandedCard === "dream" && dreamLifeAchievableAge && (() => {
+              const snap = yearlySnapshots.find(s => s.age === dreamLifeAchievableAge);
+              if (!snap) return null;
+              return (
+                <div className="card-breakdown mt-3 pt-3 border-t border-border/50 space-y-1.5 text-xs text-muted-foreground">
+                  <p className="text-primary/70 font-medium mb-2">At age {dreamLifeAchievableAge}:</p>
+                  <div className="flex justify-between"><span>Salary</span><span className="font-mono text-foreground">{formatCurrency(snap.salary)}</span></div>
+                  <div className="flex justify-between"><span>Investment income</span><span className="font-mono text-foreground">{formatCurrency(snap.investmentIncome)}</span></div>
+                  <div className="flex justify-between font-medium text-primary/80 pt-1 border-t border-border/30"><span>Total income</span><span className="font-mono">{formatCurrency(snap.totalIncome)}</span></div>
+                  <div className="flex justify-between mt-1"><span>Total expenses</span><span className="font-mono text-foreground">{formatCurrency(snap.totalExpenses)}</span></div>
+                  <div className="flex justify-between"><span>Net worth</span><span className="font-mono text-foreground">{formatCurrency(snap.netWorth)}</span></div>
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-blue-700 mb-1">
-              <Coins className="h-4 w-4" />
-              <span className="text-xs font-medium uppercase tracking-wider">
-                Dream Life Costs
-              </span>
+        {dreamEntrepreneurialAge !== null && (
+          <Card className="glass-card stat-card col-span-2 border-primary/15" onClick={() => toggleCard("entrepreneur")}>
+            <CardContent>
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2 text-primary/90">
+                  <span className="text-sm">🚀</span>
+                  <span className="text-xs font-medium uppercase tracking-wider">
+                    Entrepreneurial Dream At
+                  </span>
+                  <span className="group relative cursor-help" onClick={(e) => e.stopPropagation()}>
+                    <Info className="h-3.5 w-3.5 text-primary/50" />
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-lg bg-popover text-popover-foreground text-xs p-2.5 hidden group-hover:block z-50 border border-border shadow-lg">
+                      The earliest age when you've bought your home, started your businesses, and your income covers all expenses.
+                    </span>
+                  </span>
+                </div>
+                <ChevronDown className={`h-4 w-4 text-primary/30 transition-transform duration-300 ${expandedCard === "entrepreneur" ? "rotate-180" : ""}`} />
+              </div>
+              <p className="text-4xl font-bold text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
+                {dreamEntrepreneurialAge}
+              </p>
+              <p className="text-sm text-primary/70 mt-1" style={{ fontFamily: "'Libre Baskerville', serif", fontStyle: 'italic' }}>
+                In {dreamEntrepreneurialAge - yearlySnapshots[0].age} years — including your businesses!
+              </p>
+              {expandedCard === "entrepreneur" && (() => {
+                const snap = yearlySnapshots.find(s => s.age === dreamEntrepreneurialAge);
+                if (!snap) return null;
+                const totalBusinessCost = inputs.businesses.reduce((s, b) => s + (b.estimatedPrice ?? 0), 0);
+                return (
+                  <div className="card-breakdown mt-3 pt-3 border-t border-border/50 space-y-1.5 text-xs text-muted-foreground">
+                    <p className="text-primary/70 font-medium mb-2">At age {dreamEntrepreneurialAge}:</p>
+                    <div className="flex justify-between"><span>Total income</span><span className="font-mono text-foreground">{formatCurrency(snap.totalIncome)}</span></div>
+                    <div className="flex justify-between"><span>Total expenses</span><span className="font-mono text-foreground">{formatCurrency(snap.totalExpenses)}</span></div>
+                    <div className="flex justify-between"><span>Business investment</span><span className="font-mono text-foreground">{formatCurrency(totalBusinessCost)}</span></div>
+                    <div className="flex justify-between"><span>Net worth</span><span className="font-mono text-foreground">{formatCurrency(snap.netWorth)}</span></div>
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        )}
+
+        <Card className="glass-card stat-card" onClick={() => toggleCard("annual")}>
+          <CardContent>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Coins className="h-4 w-4" />
+                <span className="text-xs font-medium uppercase tracking-wider">
+                  Annual Costs
+                </span>
+                <span className="group relative cursor-help" onClick={(e) => e.stopPropagation()}>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground/60" />
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 rounded-lg bg-popover text-popover-foreground text-xs p-2.5 hidden group-hover:block z-50 border border-border shadow-lg">
+                    Average yearly expenses over the last 5 years of the simulation.
+                  </span>
+                </span>
+              </div>
+              <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground/30 transition-transform duration-300 ${expandedCard === "annual" ? "rotate-180" : ""}`} />
             </div>
-            <p className="text-3xl font-bold text-blue-800">
+            <p className="text-3xl font-bold text-foreground">
               {formatCurrency(dreamLifeAnnualCost)}
             </p>
-            <p className="text-xs text-blue-600 mt-1">per year</p>
+            <p className="text-xs text-muted-foreground mt-1">per year</p>
+            {expandedCard === "annual" && (() => {
+              const last5 = yearlySnapshots.slice(-5);
+              const avg = (fn: (s: typeof last5[0]) => number) => Math.round(last5.reduce((s, y) => s + fn(y), 0) / last5.length);
+              return (
+                <div className="card-breakdown mt-3 pt-3 border-t border-border/50 space-y-1.5 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground/70 font-medium mb-2">Avg. over last 5 years:</p>
+                  <div className="flex justify-between"><span>Housing</span><span className="font-mono text-foreground">{formatCurrency(avg(s => s.housing))}</span></div>
+                  <div className="flex justify-between"><span>Living expenses</span><span className="font-mono text-foreground">{formatCurrency(avg(s => s.livingExpenses))}</span></div>
+                  <div className="flex justify-between"><span>Kids</span><span className="font-mono text-foreground">{formatCurrency(avg(s => s.kidsCosts))}</span></div>
+                  <div className="flex justify-between"><span>Car</span><span className="font-mono text-foreground">{formatCurrency(avg(s => s.carExpenses))}</span></div>
+                  <div className="flex justify-between"><span>Travel</span><span className="font-mono text-foreground">{formatCurrency(avg(s => s.travelCosts))}</span></div>
+                  <div className="flex justify-between"><span>Hobbies & other</span><span className="font-mono text-foreground">{formatCurrency(avg(s => s.hobbyCosts + s.otherExpenses))}</span></div>
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-purple-700 mb-1">
-              <TrendingUp className="h-4 w-4" />
-              <span className="text-xs font-medium uppercase tracking-wider">
-                Freedom Number
-              </span>
+        <Card className="glass-card stat-card" onClick={() => toggleCard("assets")}>
+          <CardContent>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <ShoppingBag className="h-4 w-4" />
+                <span className="text-xs font-medium uppercase tracking-wider">
+                  Assets & Purchases
+                </span>
+                <span className="group relative cursor-help" onClick={(e) => e.stopPropagation()}>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground/60" />
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-lg bg-popover text-popover-foreground text-xs p-2.5 hidden group-hover:block z-50 border border-border shadow-lg">
+                    Total cost of home, holiday home, car purchases, businesses, and big purchases.
+                  </span>
+                </span>
+              </div>
+              <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground/30 transition-transform duration-300 ${expandedCard === "assets" ? "rotate-180" : ""}`} />
             </div>
-            <p className="text-3xl font-bold text-purple-800">
-              {formatCurrency(goalAmount)}
+            <p className="text-3xl font-bold text-foreground">
+              {formatCurrency(totalAssetsCost)}
             </p>
-            <p className="text-xs text-purple-600 mt-1">
-              25x annual expenses (4% rule)
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">homes, cars, businesses</p>
+            {expandedCard === "assets" && (() => {
+              const homePrice = inputs.dreamHome.estimatedPrice ?? 300000;
+              const hhPrice = inputs.holidayHome?.estimatedPrice ?? 0;
+              const totalBusinessCost = inputs.businesses.reduce((s, b) => s + (b.estimatedPrice ?? 0), 0);
+              const totalBigPurchases = inputs.bigPurchases.reduce((s, p) => s + (p.estimatedPrice ?? 0), 0);
+              const carCosts = totalAssetsCost - homePrice - hhPrice - totalBusinessCost - totalBigPurchases;
+              return (
+                <div className="card-breakdown mt-3 pt-3 border-t border-border/50 space-y-1.5 text-xs text-muted-foreground">
+                  <div className="flex justify-between"><span>Dream home</span><span className="font-mono text-foreground">{formatCurrency(homePrice)}</span></div>
+                  {hhPrice > 0 && <div className="flex justify-between"><span>Holiday home</span><span className="font-mono text-foreground">{formatCurrency(hhPrice)}</span></div>}
+                  <div className="flex justify-between"><span>Cars (incl. replacements)</span><span className="font-mono text-foreground">{formatCurrency(Math.max(0, carCosts))}</span></div>
+                  {totalBusinessCost > 0 && <div className="flex justify-between"><span>Businesses</span><span className="font-mono text-foreground">{formatCurrency(totalBusinessCost)}</span></div>}
+                  {totalBigPurchases > 0 && <div className="flex justify-between"><span>Big purchases</span><span className="font-mono text-foreground">{formatCurrency(totalBigPurchases)}</span></div>}
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-amber-700 mb-1">
-              <Calendar className="h-4 w-4" />
-              <span className="text-xs font-medium uppercase tracking-wider">
-                Total Lifetime Cost
-              </span>
+        {totalKidsCost > 0 && (
+          <Card className="glass-card stat-card" onClick={() => toggleCard("kids")}>
+            <CardContent>
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <span className="text-sm">👶</span>
+                  <span className="text-xs font-medium uppercase tracking-wider">
+                    Kids Cost
+                  </span>
+                  <span className="group relative cursor-help" onClick={(e) => e.stopPropagation()}>
+                    <Info className="h-3.5 w-3.5 text-muted-foreground/60" />
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 rounded-lg bg-popover text-popover-foreground text-xs p-2.5 hidden group-hover:block z-50 border border-border shadow-lg">
+                      Total child-rearing costs from birth to age 21.
+                    </span>
+                  </span>
+                </div>
+                <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground/30 transition-transform duration-300 ${expandedCard === "kids" ? "rotate-180" : ""}`} />
+              </div>
+              <p className="text-3xl font-bold text-foreground">
+                {formatCurrency(totalKidsCost)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">birth to age 21</p>
+              {expandedCard === "kids" && (
+                <div className="card-breakdown mt-3 pt-3 border-t border-border/50 space-y-1.5 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground/70 font-medium mb-2">{inputs.numberOfKids} child{inputs.numberOfKids !== 1 ? "ren" : ""}, cost per year by age:</p>
+                  <div className="flex justify-between"><span>0–5 yrs (childcare)</span><span className="font-mono text-foreground">€8,000/yr</span></div>
+                  <div className="flex justify-between"><span>6–12 yrs (school age)</span><span className="font-mono text-foreground">€10,000/yr</span></div>
+                  <div className="flex justify-between"><span>13–17 yrs (teen)</span><span className="font-mono text-foreground">€12,000/yr</span></div>
+                  <div className="flex justify-between"><span>18–21 yrs (university)</span><span className="font-mono text-foreground">€15,000/yr</span></div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        <Card className="glass-card stat-card" onClick={() => toggleCard("lifetime")}>
+          <CardContent>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span className="text-xs font-medium uppercase tracking-wider">
+                  Total Lifetime Cost
+                </span>
+                <span className="group relative cursor-help" onClick={(e) => e.stopPropagation()}>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground/60" />
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 rounded-lg bg-popover text-popover-foreground text-xs p-2.5 hidden group-hover:block z-50 border border-border shadow-lg">
+                    Sum of all expenses from now until retirement.
+                  </span>
+                </span>
+              </div>
+              <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground/30 transition-transform duration-300 ${expandedCard === "lifetime" ? "rotate-180" : ""}`} />
             </div>
-            <p className="text-3xl font-bold text-amber-800">
+            <p className="text-3xl font-bold text-foreground">
               {formatCurrency(totalLifetimeCost)}
             </p>
-            <p className="text-xs text-amber-600 mt-1">
-              until retirement
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">until retirement</p>
+            {expandedCard === "lifetime" && (() => {
+              const totals = yearlySnapshots.reduce((acc, s) => ({
+                housing: acc.housing + s.housing,
+                living: acc.living + s.livingExpenses,
+                kids: acc.kids + s.kidsCosts,
+                car: acc.car + s.carExpenses,
+                travel: acc.travel + s.travelCosts,
+                other: acc.other + s.hobbyCosts + s.otherExpenses,
+              }), { housing: 0, living: 0, kids: 0, car: 0, travel: 0, other: 0 });
+              return (
+                <div className="card-breakdown mt-3 pt-3 border-t border-border/50 space-y-1.5 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground/70 font-medium mb-2">Over {yearlySnapshots.length} years:</p>
+                  <div className="flex justify-between"><span>Housing</span><span className="font-mono text-foreground">{formatCurrency(Math.round(totals.housing))}</span></div>
+                  <div className="flex justify-between"><span>Living expenses</span><span className="font-mono text-foreground">{formatCurrency(Math.round(totals.living))}</span></div>
+                  {totals.kids > 0 && <div className="flex justify-between"><span>Kids</span><span className="font-mono text-foreground">{formatCurrency(Math.round(totals.kids))}</span></div>}
+                  <div className="flex justify-between"><span>Car</span><span className="font-mono text-foreground">{formatCurrency(Math.round(totals.car))}</span></div>
+                  <div className="flex justify-between"><span>Travel</span><span className="font-mono text-foreground">{formatCurrency(Math.round(totals.travel))}</span></div>
+                  <div className="flex justify-between"><span>Hobbies & other</span><span className="font-mono text-foreground">{formatCurrency(Math.round(totals.other))}</span></div>
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
       </div>
 
       {/* Lifestyle Tier */}
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="glass-card">
+        <CardContent>
           <div className="flex items-center gap-3">
-            <Badge className={`${tier.color} text-sm px-3 py-1`}>
+            <Badge className="bg-primary/20 text-primary border-primary/30 text-sm px-3 py-1">
               {tier.label}
             </Badge>
-            <p className="text-sm text-muted-foreground">{tier.message}</p>
+            <p className="text-sm text-muted-foreground" style={{ fontFamily: "'Libre Baskerville', serif", fontSize: '16px' }}>{tier.message}</p>
           </div>
           {/* Tier scale */}
           <div className="mt-4 flex items-center gap-1">
@@ -193,13 +375,7 @@ export function ResultsDashboard({ result }: ResultsDashboardProps) {
                   key={t}
                   className={`flex-1 h-2 rounded-full ${
                     t === tier.label
-                      ? t === "Modest"
-                        ? "bg-green-500"
-                        : t === "Comfortable"
-                          ? "bg-blue-500"
-                          : t === "Luxurious"
-                            ? "bg-purple-500"
-                            : "bg-amber-500"
+                      ? "bg-primary"
                       : "bg-muted"
                   }`}
                 />
@@ -216,9 +392,9 @@ export function ResultsDashboard({ result }: ResultsDashboardProps) {
       </Card>
 
       {/* Net Worth Chart */}
-      <Card>
+      <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="text-lg">Net Worth Journey</CardTitle>
+          <CardTitle className="text-lg" style={{ fontFamily: "'Fraunces', serif" }}>Net Worth Journey</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[350px]">
@@ -235,33 +411,38 @@ export function ResultsDashboard({ result }: ResultsDashboardProps) {
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend />
-                <ReferenceLine
-                  y={goalAmount}
-                  stroke="#16a34a"
-                  strokeDasharray="8 4"
-                  label={{
-                    value: `Freedom: ${formatCurrency(goalAmount)}`,
-                    position: "right",
-                    fill: "#16a34a",
-                    fontSize: 12,
-                  }}
-                />
+                {dreamLifeAchievableAge && (
+                  <ReferenceLine
+                    x={dreamLifeAchievableAge}
+                    stroke="#C4A882"
+                    strokeWidth={2}
+                    strokeDasharray="6 3"
+                    label={{
+                      value: `⭐ Dream life at ${dreamLifeAchievableAge}`,
+                      position: "top",
+                      fill: "#D4C5A9",
+                      fontSize: 13,
+                      fontWeight: 600,
+                    }}
+                  />
+                )}
                 {milestones
-                  .filter((m) => m.label.includes("home") || m.label.includes("retirement") || m.label.includes("Freedom"))
+                  .filter((m) => m.label.includes("home") || m.label.includes("retirement") || m.label.includes("Dream life"))
                   .map((m, i) => (
                     <ReferenceDot
                       key={i}
                       x={m.age}
                       y={m.netWorth}
-                      r={6}
-                      fill="#f59e0b"
+                      r={7}
+                      fill={m.label.includes("Dream life") ? "#C4A882" : "#A69076"}
                       stroke="#fff"
+                      strokeWidth={2}
                     />
                   ))}
                 <Line
                   type="monotone"
                   dataKey="Net Worth"
-                  stroke="#8b5cf6"
+                  stroke="#A69076"
                   strokeWidth={3}
                   dot={false}
                 />
@@ -280,9 +461,9 @@ export function ResultsDashboard({ result }: ResultsDashboardProps) {
       </Card>
 
       {/* Income vs Expenses Chart */}
-      <Card>
+      <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="text-lg">
+          <CardTitle className="text-lg" style={{ fontFamily: "'Fraunces', serif" }}>
             Income vs Expenses (Year by Year)
           </CardTitle>
         </CardHeader>
@@ -304,8 +485,8 @@ export function ResultsDashboard({ result }: ResultsDashboardProps) {
                   type="monotone"
                   dataKey="Salary"
                   stackId="income"
-                  fill="#16a34a"
-                  stroke="#16a34a"
+                  fill="#8B9E6B"
+                  stroke="#8B9E6B"
                   fillOpacity={0.6}
                 />
                 <Area
@@ -345,8 +526,16 @@ export function ResultsDashboard({ result }: ResultsDashboardProps) {
                   type="monotone"
                   dataKey="Car"
                   stackId="expenses"
-                  fill="#8b5cf6"
-                  stroke="#8b5cf6"
+                  fill="#A69076"
+                  stroke="#A69076"
+                  fillOpacity={0.5}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="Travel"
+                  stackId="expenses"
+                  fill="#06b6d4"
+                  stroke="#06b6d4"
                   fillOpacity={0.5}
                 />
                 <Area
@@ -363,23 +552,60 @@ export function ResultsDashboard({ result }: ResultsDashboardProps) {
         </CardContent>
       </Card>
 
-      {/* Milestones Timeline */}
-      <Card>
+      {/* Milestones Timeline Chart */}
+      <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="text-lg">Life Milestones</CardTitle>
+          <CardTitle className="text-lg" style={{ fontFamily: "'Fraunces', serif" }}>Life Milestones</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={netWorthData}>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-20" />
+                <XAxis dataKey="age" />
+                <YAxis tickFormatter={formatCurrency} width={70} />
+                <Tooltip content={<CustomTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey="Net Worth"
+                  stroke="#e5e7eb"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                {milestones.map((m, i) => {
+                  const emoji = m.label.match(/^[^\s]+/)?.[0] ?? "·";
+                  return (
+                    <ReferenceDot
+                      key={i}
+                      x={m.age}
+                      y={m.netWorth}
+                      r={0}
+                    >
+                      <RechartsLabel
+                        value={emoji}
+                        position="top"
+                        style={{ fontSize: 18 }}
+                      />
+                    </ReferenceDot>
+                  );
+                })}
+                {dreamLifeAchievableAge && (
+                  <ReferenceLine
+                    x={dreamLifeAchievableAge}
+                    stroke="#C4A882"
+                    strokeDasharray="6 3"
+                  />
+                )}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          {/* Legend */}
+          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
             {milestones.map((m, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <Badge variant="outline" className="tabular-nums shrink-0">
-                  Age {m.age}
-                </Badge>
-                <span className="text-sm">{m.label}</span>
-                <span className="text-xs text-muted-foreground ml-auto tabular-nums">
-                  Net worth: {formatCurrency(m.netWorth)}
-                </span>
-              </div>
+              <span key={i}>
+                <span className="font-medium text-foreground">Age {m.age}</span>{" "}
+                {m.label}
+              </span>
             ))}
           </div>
         </CardContent>

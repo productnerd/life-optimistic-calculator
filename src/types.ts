@@ -1,13 +1,29 @@
+export interface IncomeStream {
+  name: string;
+  monthlyAmount: number;
+  annualGrowthRate: number; // % per year
+  startsInYears: number; // 0 = now, 3 = starts in 3 years
+}
+
+export interface ExpenseCategory {
+  name: string;
+  monthlyAmount: number;
+}
+
 export interface DreamInputs {
   // Personal
   currentAge: number;
   targetRetireAge: number;
   currentSavings: number;
+  currentInvestments: number;
   country: string;
 
   // Income
   annualSalary: number;
   salaryGrowthRate: number; // % per year
+  additionalIncome: IncomeStream[];
+  partnerSalary: number | null; // null = no partner, 0+ = partner salary
+  partnerSalaryGrowth: number;
 
   // Investment
   investmentPercentage: number; // % of salary invested
@@ -31,14 +47,29 @@ export interface DreamInputs {
   kidsAges: number[]; // current ages or negative = years until born
 
   // Lifestyle
-  monthlyLivingExpenses: number;
+  livingExpenses: ExpenseCategory[];
   hobbies: AIPricedItem[];
   bigPurchases: AIPricedItem[];
-  startBusiness: AIPricedItem | null;
+  businesses: AIPricedItem[];
+
+  // Technology
+  techUpgradeCycle: number; // years between upgrades
+  techUpgradeCost: number; // total cost per cycle (laptop + phone)
+
+  // Travel
+  tripsPerYear: number;
+  avgCostPerTrip: number;
+  travelKidsMultiplier: number; // extra cost per kid per trip (multiplier)
+
+  // Inheritance & Family Gifts
+  expectedInheritance: number; // lump sum at age 65 (parents 25 at birth, live to 90)
+  familyGiftAmount: number; // gift amount received every X years
+  familyGiftInterval: number; // years between gifts (e.g. 10 = every decade)
 
   // Mini-retirements
-  miniRetirements: number; // number of 6-month breaks
-  miniRetirementSpacing: number; // years between breaks
+  miniRetirements: number; // number of mini-retirements
+  miniRetirementDuration: number; // duration in months
+  miniRetirementStopSideIncome: boolean; // true = side income also stops during mini-retirement
 }
 
 export interface AIPricedItem {
@@ -60,6 +91,7 @@ export interface YearlySnapshot {
   kidsCosts: number;
   livingExpenses: number;
   hobbyCosts: number;
+  travelCosts: number;
   otherExpenses: number;
   totalExpenses: number;
   // Balances
@@ -78,6 +110,10 @@ export interface SimulationResult {
   yearsToGoal: number;
   goalReachedAge: number;
   dreamLifeAnnualCost: number;
+  dreamLifeAchievableAge: number | null;
+  dreamEntrepreneurialAge: number | null;
+  totalAssetsCost: number; // house, car, businesses, big purchases
+  totalKidsCost: number; // cumulative child-rearing costs
 }
 
 export function createDefaultInputs(): DreamInputs {
@@ -85,9 +121,13 @@ export function createDefaultInputs(): DreamInputs {
     currentAge: 25,
     targetRetireAge: 55,
     currentSavings: 5000,
+    currentInvestments: 0,
     country: "Europe",
     annualSalary: 50000,
     salaryGrowthRate: 2,
+    additionalIncome: [],
+    partnerSalary: null,
+    partnerSalaryGrowth: 2,
     investmentPercentage: 20,
     expectedReturn: 7,
     inflationRate: 2.5,
@@ -100,12 +140,31 @@ export function createDefaultInputs(): DreamInputs {
     dreamCar: { description: "", estimatedPrice: 25000, isLoading: false },
     annualCarCosts: 3000,
     numberOfKids: 1,
-    kidsAges: [-3], // planning to have a kid in 3 years
-    monthlyLivingExpenses: 2000,
+    kidsAges: [-3],
+    livingExpenses: [
+      { name: "Food & Groceries", monthlyAmount: 500 },
+      { name: "Utilities & Bills", monthlyAmount: 250 },
+      { name: "Transport", monthlyAmount: 200 },
+      { name: "Software & Subscriptions", monthlyAmount: 100 },
+      { name: "Shopping & Clothing", monthlyAmount: 200 },
+      { name: "Health & Fitness", monthlyAmount: 100 },
+      { name: "Entertainment & Dining Out", monthlyAmount: 300 },
+      { name: "Insurance", monthlyAmount: 200 },
+      { name: "Personal Care", monthlyAmount: 150 },
+    ],
     hobbies: [],
     bigPurchases: [],
-    startBusiness: null,
+    businesses: [],
+    techUpgradeCycle: 3,
+    techUpgradeCost: 2500,
+    tripsPerYear: 2,
+    avgCostPerTrip: 1500,
+    travelKidsMultiplier: 0.5,
+    expectedInheritance: 0,
+    familyGiftAmount: 0,
+    familyGiftInterval: 10,
     miniRetirements: 1,
-    miniRetirementSpacing: 10,
+    miniRetirementDuration: 6,
+    miniRetirementStopSideIncome: false,
   };
 }

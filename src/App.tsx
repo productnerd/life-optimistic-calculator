@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback } from "react";
-import { Separator } from "@/components/ui/separator";
 import { InputSections } from "@/components/InputSections";
 import { ResultsDashboard } from "@/components/ResultsDashboard";
 import { ApiKeyDialog } from "@/components/ApiKeyDialog";
@@ -7,13 +6,85 @@ import { createDefaultInputs } from "@/types";
 import type { DreamInputs } from "@/types";
 import { runSimulation } from "@/engine";
 import { estimatePrice } from "@/ai";
-import { Calculator, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 
 function App() {
-  const [inputs, setInputs] = useState<DreamInputs>(createDefaultInputs);
+  const [inputs, setInputs] = useState<DreamInputs>(() => {
+    try {
+      const saved = localStorage.getItem("life-calc-inputs");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Migrate old data formats
+        if (parsed.additionalIncome) {
+          parsed.additionalIncome = parsed.additionalIncome.map(
+            (s: any) => ({
+              ...s,
+              annualGrowthRate: s.annualGrowthRate ?? 3,
+            })
+          );
+        }
+        if (parsed.startBusiness && !parsed.businesses) {
+          parsed.businesses = parsed.startBusiness
+            ? [parsed.startBusiness]
+            : [];
+          delete parsed.startBusiness;
+        }
+        if (parsed.partnerSalary === undefined) {
+          parsed.partnerSalary = null;
+        }
+        if (parsed.partnerSalaryGrowth === undefined) {
+          parsed.partnerSalaryGrowth = 2;
+        }
+        if (parsed.travelKidsMultiplier === undefined) {
+          parsed.travelKidsMultiplier = 0.5;
+        }
+        // Migrate monthlyLivingExpenses → livingExpenses
+        if (parsed.monthlyLivingExpenses !== undefined && !parsed.livingExpenses) {
+          const total = parsed.monthlyLivingExpenses;
+          parsed.livingExpenses = [
+            { name: "Food & Groceries", monthlyAmount: Math.round(total * 0.25) },
+            { name: "Utilities & Bills", monthlyAmount: Math.round(total * 0.125) },
+            { name: "Transport", monthlyAmount: Math.round(total * 0.1) },
+            { name: "Software & Subscriptions", monthlyAmount: Math.round(total * 0.05) },
+            { name: "Shopping & Clothing", monthlyAmount: Math.round(total * 0.1) },
+            { name: "Health & Fitness", monthlyAmount: Math.round(total * 0.05) },
+            { name: "Entertainment & Dining Out", monthlyAmount: Math.round(total * 0.15) },
+            { name: "Insurance", monthlyAmount: Math.round(total * 0.1) },
+            { name: "Personal Care", monthlyAmount: Math.round(total * 0.075) },
+          ];
+          delete parsed.monthlyLivingExpenses;
+        }
+        if (parsed.techUpgradeCycle === undefined) {
+          parsed.techUpgradeCycle = 3;
+        }
+        if (parsed.techUpgradeCost === undefined) {
+          parsed.techUpgradeCost = 2500;
+        }
+        if (parsed.expectedInheritance === undefined) {
+          parsed.expectedInheritance = 0;
+        }
+        if (parsed.familyGiftAmount === undefined) {
+          parsed.familyGiftAmount = 0;
+        }
+        if (parsed.familyGiftInterval === undefined) {
+          parsed.familyGiftInterval = 10;
+        }
+        if (parsed.miniRetirementStopSideIncome === undefined) {
+          parsed.miniRetirementStopSideIncome = false;
+        }
+        return { ...createDefaultInputs(), ...parsed };
+      }
+    } catch {}
+    return createDefaultInputs();
+  });
   const [apiKey, setApiKey] = useState<string | null>(() =>
     localStorage.getItem("claude-api-key")
   );
+
+  const updateInputs = useCallback((newInputs: DreamInputs) => {
+    setInputs(newInputs);
+    localStorage.setItem("life-calc-inputs", JSON.stringify(newInputs));
+  }, []);
 
   const handleApiKeyChange = useCallback((key: string | null) => {
     setApiKey(key);
@@ -34,20 +105,20 @@ function App() {
   const result = useMemo(() => runSimulation(inputs), [inputs]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50/50 via-background to-background">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-border/50 glass-card sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-              <Calculator className="h-5 w-5 text-white" />
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center">
+              <span className="text-xl">✨</span>
             </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tight">
+              <h1 className="text-lg font-bold tracking-tight" style={{ fontFamily: "'Fraunces', serif" }}>
                 Life Optimistic Calculator
               </h1>
-              <p className="text-xs text-muted-foreground">
-                Your dream life costs less than you think
+              <p className="text-xs text-muted-foreground italic" style={{ fontFamily: "'Libre Baskerville', serif", fontSize: '14px' }}>
+                your dream life costs less than you think
               </p>
             </div>
           </div>
@@ -57,52 +128,57 @@ function App() {
 
       {/* Hero */}
       <section className="max-w-7xl mx-auto px-4 py-12 text-center">
-        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">
-          How much does your
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500">
-            {" "}
-            dream life{" "}
-          </span>
+        <h2
+          className="text-4xl md:text-5xl font-black tracking-tight text-foreground"
+          style={{ fontFamily: "'Fraunces', serif" }}
+        >
+          How much does your{" "}
+          <span className="text-primary">
+            dream life
+          </span>{" "}
           actually cost?
         </h2>
-        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Most people overestimate what they need. Configure your ideal
-          lifestyle below and discover that financial freedom might be closer
-          than you think.
+        <p
+          className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto italic"
+          style={{ fontFamily: "'Libre Baskerville', serif", fontSize: '20px' }}
+        >
+          Most people overestimate what they need.
         </p>
       </section>
 
-      <Separator />
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-[1fr_1.2fr] gap-8">
           {/* Left: Inputs */}
           <div>
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-              Design Your Dream Life
-            </h3>
             <InputSections
               inputs={inputs}
-              onChange={setInputs}
+              onChange={updateInputs}
               onEstimate={handleEstimate}
             />
           </div>
 
           {/* Right: Results */}
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+            <h3
+              className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4"
+              style={{ fontFamily: "'Libre Baskerville', serif", fontSize: '18px', textTransform: 'none', letterSpacing: '0.02em' }}
+            >
               Your Financial Journey
             </h3>
-            <ResultsDashboard result={result} />
+            <ResultsDashboard result={result} inputs={inputs} />
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t mt-16 py-8 text-center text-sm text-muted-foreground">
-        <p className="flex items-center justify-center gap-1">
-          Made with <Heart className="h-4 w-4 text-red-500 fill-red-500" /> to
+      <footer className="border-t border-border/50 mt-16 py-8 text-center text-sm text-muted-foreground">
+        <p className="flex items-center justify-center gap-1" style={{ fontFamily: "'Libre Baskerville', serif", fontSize: '18px' }}>
+          Made with <Heart className="h-4 w-4 text-primary fill-primary" /> to
           help people realize their dreams are closer than they think
         </p>
         <p className="mt-2 text-xs">

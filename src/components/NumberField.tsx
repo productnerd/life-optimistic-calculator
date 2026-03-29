@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -24,6 +25,35 @@ export function NumberField({
   suffix,
   description,
 }: NumberFieldProps) {
+  const [display, setDisplay] = useState(String(value));
+  const [focused, setFocused] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    setDisplay(raw);
+    const num = Number(raw);
+    if (raw !== "" && !isNaN(num)) {
+      onChange(num);
+    }
+  };
+
+  const handleBlur = () => {
+    setFocused(false);
+    if (display === "" || isNaN(Number(display))) {
+      setDisplay(String(min ?? 0));
+      onChange(min ?? 0);
+    } else {
+      setDisplay(String(Number(display)));
+    }
+  };
+
+  const handleFocus = () => {
+    setFocused(true);
+  };
+
+  // Sync external value changes when not focused
+  const shown = focused ? display : String(value);
+
   return (
     <div className="space-y-2">
       <Label className="text-sm font-medium">{label}</Label>
@@ -38,8 +68,10 @@ export function NumberField({
         )}
         <Input
           type="number"
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
+          value={shown}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           min={min}
           max={max}
           step={step}
