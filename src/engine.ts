@@ -200,15 +200,25 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     }
     housing += holidayHousing;
 
-    // Car
+    // Car (replaced every 15 years)
     let carExpenses = inputs.annualCarCosts * inflationMultiplier;
     if (y === 0) {
       carExpenses += carPrice;
       milestones.push("🚗 Bought dream car!");
     }
-    if (y > 0 && y % 8 === 0) {
+    if (y > 0 && y % 15 === 0) {
       carExpenses += carPrice * inflationMultiplier;
       milestones.push("🚗 Replaced car");
+    }
+
+    // Home renovation (every 20 years, 10% of home value)
+    if (houseBoughtYear >= 0 && y > houseBoughtYear) {
+      const yearsOwned = y - houseBoughtYear;
+      if (yearsOwned > 0 && yearsOwned % 20 === 0) {
+        const renovationCost = homePrice * 0.1 * inflationMultiplier;
+        housing += renovationCost;
+        milestones.push("🔨 Home renovation");
+      }
     }
 
     // Kids
@@ -262,7 +272,10 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     } else {
       portfolioValue += investmentAmount;
     }
-    portfolioValue *= 1 + inputs.expectedReturn / 100;
+    // Apply returns only on positive portfolio (can't earn returns on debt)
+    if (portfolioValue > 0) {
+      portfolioValue *= 1 + inputs.expectedReturn / 100;
+    }
 
     // Net worth = portfolio + home equity (tracks actual equity built up)
     let homeEquity = 0;
@@ -360,7 +373,7 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     let purchases = 0;
     const yr = y.year - 1;
     if (yr === 0) purchases = carPrice;
-    if (yr > 0 && yr % 8 === 0) purchases = carPrice * Math.pow(1 + inputs.inflationRate / 100, yr);
+    if (yr > 0 && yr % 15 === 0) purchases = carPrice * Math.pow(1 + inputs.inflationRate / 100, yr);
     return s + purchases;
   }, 0);
   const totalAssetsCost =
