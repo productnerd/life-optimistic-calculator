@@ -5,7 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   AreaChart,
   Area,
@@ -35,36 +34,6 @@ function formatCurrency(n: number): string {
   return `€${n.toLocaleString()}`;
 }
 
-function getLifestyleTier(annualCost: number): {
-  label: string;
-  color: string;
-  message: string;
-} {
-  if (annualCost < 25000)
-    return {
-      label: "Modest",
-      color: "bg-green-100 text-green-800",
-      message: "Very achievable! Most jobs can get you here.",
-    };
-  if (annualCost < 50000)
-    return {
-      label: "Comfortable",
-      color: "bg-blue-100 text-blue-800",
-      message: "A great life. Totally within reach with a solid career.",
-    };
-  if (annualCost < 100000)
-    return {
-      label: "Luxurious",
-      color: "bg-purple-100 text-purple-800",
-      message: "Living well — requires dedication but very doable.",
-    };
-  return {
-    label: "Ultra-Luxury",
-    color: "bg-amber-100 text-amber-800",
-    message: "The top tier — each step up here costs exponentially more.",
-  };
-}
-
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
@@ -82,7 +51,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
   const { yearlySnapshots, totalLifetimeCost, dreamLifeAnnualCost, dreamLifeAchievableAge, dreamEntrepreneurialAge, totalAssetsCost, totalKidsCost } = result;
-  const tier = getLifestyleTier(dreamLifeAnnualCost);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const toggleCard = (id: string) => setExpandedCard(prev => prev === id ? null : id);
 
@@ -360,39 +328,6 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
         </Card>
       </div>
 
-      {/* Lifestyle Tier */}
-      <Card className="glass-card">
-        <CardContent>
-          <div className="flex items-center gap-3">
-            <Badge className="bg-primary/20 text-primary border-primary/30 text-sm px-3 py-1">
-              {tier.label}
-            </Badge>
-            <p className="text-sm text-muted-foreground" >{tier.message}</p>
-          </div>
-          {/* Tier scale */}
-          <div className="mt-4 flex items-center gap-1">
-            {["Modest", "Comfortable", "Luxurious", "Ultra-Luxury"].map(
-              (t) => (
-                <div
-                  key={t}
-                  className={`flex-1 h-2 rounded-full ${
-                    t === tier.label
-                      ? "bg-primary"
-                      : "bg-muted"
-                  }`}
-                />
-              )
-            )}
-          </div>
-          <div className="flex justify-between mt-1 text-xs text-muted-foreground">
-            <span>Modest</span>
-            <span>Comfortable</span>
-            <span>Luxurious</span>
-            <span>Ultra-Luxury</span>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Net Worth Chart */}
       <Card className="glass-card">
         <CardHeader>
@@ -439,6 +374,19 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
                       fill={m.label.includes("Dream life") ? "#C4A882" : "#A69076"}
                       stroke="#fff"
                       strokeWidth={2}
+                      shape={(props: any) => (
+                        <circle
+                          cx={props.cx}
+                          cy={props.cy}
+                          r={7}
+                          fill={m.label.includes("Dream life") ? "#C4A882" : "#A69076"}
+                          stroke="#fff"
+                          strokeWidth={2}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <title>{`Age ${m.age}: ${m.label}`}</title>
+                        </circle>
+                      )}
                     />
                   ))}
                 <Line

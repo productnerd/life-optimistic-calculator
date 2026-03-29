@@ -340,7 +340,11 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     }
 
     if (isMiniRetirement && miniRetFraction >= 0.5) {
-      milestones.push(`🌴 Mini-retirement (${inputs.miniRetirementDuration}mo)`);
+      // Only show milestone on the first year of each mini-retirement
+      const prevYearMiniRet = miniRetYears.get(y - 1) ?? 0;
+      if (prevYearMiniRet === 0) {
+        milestones.push(`🌴 Mini-retirement (${inputs.miniRetirementDuration}mo)`);
+      }
     }
 
     if (age === inputs.targetRetireAge) {
