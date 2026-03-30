@@ -105,11 +105,11 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     0
   );
 
-  const totalBigPurchases = inputs.bigPurchases.reduce(
-    (sum, p) => sum + (p.estimatedPrice ?? 0),
-    0
-  );
-  const bigPurchaseAnnual = totalBigPurchases / Math.min(10, workingYearsCount);
+  // Big purchases — tracked individually, bought from cash when affordable
+  const bigPurchaseData = inputs.bigPurchases
+    .filter(p => p.estimatedPrice && p.estimatedPrice > 0)
+    .map(p => ({ price: p.estimatedPrice!, description: p.description, bought: false }));
+  const totalBigPurchases = bigPurchaseData.reduce((sum, p) => sum + p.price, 0);
 
   // Blended investment return from allocation mix
   const totalAllocPct = inputs.investmentAllocations.reduce((s, a) => s + a.percentage, 0);
@@ -219,7 +219,42 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       housing = 2000 * inflationMultiplier;
     }
 
-    // Additional properties
+    // === PURCHASE PRIORITY: car → house → business → big purchases → additional real estate ===
+
+    // 1. Car — purchase price comes from cash (priority #1)
+    let carExpenses = inputs.annualCarCosts * inflationMultiplier;
+    if (y === 0 && cashBalance >= carPrice) {
+      cashBalance -= carPrice;
+      milestones.push("🚗 Bought dream car!");
+    }
+    if (y > 0 && y % 15 === 0) {
+      const replacementCost = carPrice * inflationMultiplier;
+      if (cashBalance >= replacementCost) {
+        cashBalance -= replacementCost;
+        milestones.push("🚗 Replaced car");
+      }
+    }
+
+    // 2. House (priority #2 — needs year >= 1)
+    // (already handled above in housing section, but house purchase logic stays here)
+
+    // 3. Business startup (priority #3 — year >= 2, after house)
+    if (y === 2 && totalBusinessCost > 0) {
+      cashBalance -= totalBusinessCost;
+      milestones.push("💼 Started business!");
+    }
+
+    // 4. Big purchases from cash (priority #4 — bought when affordable, after business)
+    for (const bp of bigPurchaseData) {
+      if (!bp.bought && cashBalance >= bp.price && y >= 1) {
+        bp.bought = true;
+        cashBalance -= bp.price;
+        const label = bp.description || "big purchase";
+        milestones.push(`🛒 Bought ${label}!`);
+      }
+    }
+
+    // 5. Additional properties (priority #5 — last, needs house first + 2 years)
     let additionalHousing = 0;
     for (const prop of additionalPropertyData) {
       if (prop.boughtYear < 0) {
@@ -241,20 +276,6 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       }
     }
     housing += additionalHousing;
-
-    // Car — running costs are expenses, purchase price comes from cash
-    let carExpenses = inputs.annualCarCosts * inflationMultiplier;
-    if (y === 0 && cashBalance >= carPrice) {
-      cashBalance -= carPrice;
-      milestones.push("🚗 Bought dream car!");
-    }
-    if (y > 0 && y % 15 === 0) {
-      const replacementCost = carPrice * inflationMultiplier;
-      if (cashBalance >= replacementCost) {
-        cashBalance -= replacementCost;
-        milestones.push("🚗 Replaced car");
-      }
-    }
 
     // Home renovation (every 20 years, 10% of home value)
     if (houseBoughtYear >= 0 && y > houseBoughtYear) {
@@ -294,15 +315,8 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     const travelCosts =
       inputs.tripsPerYear * inputs.avgCostPerTrip * kidsMultiplier * inflationMultiplier;
 
-    // Other (big purchases + businesses)
-    let otherExpenses = bigPurchaseAnnual * inflationMultiplier;
-    if (y === 2 && totalBusinessCost > 0) {
-      // Business startup cost comes from cash
-      cashBalance -= totalBusinessCost;
-      milestones.push("💼 Started business!");
-    }
-
-    otherExpenses += techExpenses;
+    // Other expenses (no longer includes big purchases — those are bought from cash above)
+    let otherExpenses = techExpenses;
 
     const totalExpenses =
       housing + carExpenses + kidsCosts + livingExpenses +

@@ -30,6 +30,7 @@ export function AIField({
     try {
       const price = await onEstimate(inputValue);
       onChange({
+        ...item,
         description: inputValue,
         estimatedPrice: price,
         isLoading: false,

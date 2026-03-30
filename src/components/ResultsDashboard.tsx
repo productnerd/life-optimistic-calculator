@@ -85,9 +85,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
     age: s.age,
     "Net Worth": s.netWorth,
     "Portfolio": s.portfolioValue,
-    milestones: s.milestones.filter(m =>
-      (m.includes("home") || m.includes("Retirement") || m.includes("Dream life")) && !m.includes("Mini-retirement")
-    ),
+    milestones: s.milestones.filter(m => !m.includes("Mini-retirement")),
   }));
 
   // Collect all milestones
@@ -401,29 +399,44 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
                   />
                 )}
                 {milestones
-                  .filter((m) => (m.label.includes("home") || m.label.includes("Retirement") || m.label.includes("Dream life")) && !m.label.includes("Mini-retirement"))
-                  .map((m, i) => (
-                    <ReferenceDot
-                      key={i}
-                      x={m.age}
-                      y={m.netWorth}
-                      r={7}
-                      fill={m.label.includes("Dream life") ? "#C4A882" : "#A69076"}
-                      stroke="#fff"
-                      strokeWidth={2}
-                      shape={(props: any) => (
-                        <circle
-                          cx={props.cx}
-                          cy={props.cy}
-                          r={7}
-                          fill={m.label.includes("Dream life") ? "#C4A882" : "#A69076"}
-                          stroke="#fff"
-                          strokeWidth={2}
-                          style={{ cursor: "pointer", pointerEvents: "none" }}
-                        />
-                      )}
-                    />
-                  ))}
+                  .filter((m) => !m.label.includes("Mini-retirement"))
+                  .map((m, i) => {
+                    const color = m.label.includes("Dream life") || m.label.includes("Entrepreneurial")
+                      ? "#C4A882"
+                      : m.label.includes("home") || m.label.includes("property") || m.label.includes("Mortgage")
+                      ? "#A69076"
+                      : m.label.includes("car") || m.label.includes("Car")
+                      ? "#78716c"
+                      : m.label.includes("business") || m.label.includes("Business")
+                      ? "#e59500"
+                      : m.label.includes("gift") || m.label.includes("inheritance") || m.label.includes("Inheritance")
+                      ? "#10b981"
+                      : m.label.includes("Retirement")
+                      ? "#ef4444"
+                      : "#A69076";
+                    return (
+                      <ReferenceDot
+                        key={i}
+                        x={m.age}
+                        y={m.netWorth}
+                        r={7}
+                        fill={color}
+                        stroke="#fff"
+                        strokeWidth={2}
+                        shape={(props: any) => (
+                          <circle
+                            cx={props.cx}
+                            cy={props.cy}
+                            r={7}
+                            fill={color}
+                            stroke="#fff"
+                            strokeWidth={2}
+                            style={{ cursor: "pointer", pointerEvents: "none" }}
+                          />
+                        )}
+                      />
+                    );
+                  })}
                 <Line
                   type="monotone"
                   dataKey="Net Worth"
