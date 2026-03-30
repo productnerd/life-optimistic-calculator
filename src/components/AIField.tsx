@@ -24,8 +24,10 @@ export function AIField({
 }: AIFieldProps) {
   const [inputValue, setInputValue] = useState(item.description);
 
-  const handleEstimate = async () => {
+  const handleEstimate = async (force = false) => {
     if (!inputValue.trim()) return;
+    // Skip if description hasn't changed and we already have a price (avoid re-triggering on blur)
+    if (!force && inputValue === item.description && item.estimatedPrice !== null) return;
     onChange({ ...item, description: inputValue, isLoading: true });
     try {
       const price = await onEstimate(inputValue);
@@ -43,7 +45,7 @@ export function AIField({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleEstimate();
+      handleEstimate(true);
     }
   };
 

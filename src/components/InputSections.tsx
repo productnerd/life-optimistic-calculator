@@ -723,7 +723,8 @@ export function InputSections({
                     />
                   </div>
                   <button
-                    onClick={() => {
+                    onMouseDown={(e) => {
+                      e.preventDefault();
                       update({
                         additionalProperties: inputs.additionalProperties.filter((_, j) => j !== i),
                       });
@@ -926,7 +927,8 @@ export function InputSections({
                   size="icon"
                   variant="ghost"
                   className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive mt-2"
-                  onClick={() => {
+                  onMouseDown={(e) => {
+                    e.preventDefault();
                     const updated = inputs.businesses.filter(
                       (_, idx) => idx !== i
                     );
@@ -1017,7 +1019,8 @@ export function InputSections({
                   size="icon"
                   variant="ghost"
                   className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive mt-2"
-                  onClick={() => {
+                  onMouseDown={(e) => {
+                    e.preventDefault();
                     const updated = inputs.bigPurchases.filter(
                       (_, idx) => idx !== i
                     );
