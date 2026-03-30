@@ -64,7 +64,7 @@ const HOBBY_ANNUAL_COSTS: Record<string, number> = {
   // Social & Entertainment
   "wine tasting": 1500, "wine club": 1000, "beer brewing": 600, "home brewing": 500,
   cooking: 800, "cooking class": 1200, "baking": 500, "cocktail making": 600,
-  "book club": 200, reading: 300, writing: 300, "creative writing": 500,
+  reading: 300, writing: 300, "creative writing": 500,
   blogging: 200, vlogging: 500, podcasting: 800, streaming: 600,
   "stand-up comedy": 500, "improv": 600, acting: 1000, theater: 800,
   // Collecting
