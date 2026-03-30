@@ -137,16 +137,17 @@ function App() {
           className="text-4xl md:text-5xl font-black tracking-tight text-foreground"
           style={{ fontFamily: "'Fraunces', serif" }}
         >
-          You don't need to slave around to get your{" "}
+          Your{" "}
           <span className="text-primary">
             dream life
-          </span>.
+          </span>{" "}
+          costs less than you think.
         </h2>
         <p
           className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto italic"
           style={{ fontFamily: "'DM Sans', sans-serif" }}
         >
-          Your dream life costs less than you think.
+          You don't need to slave around to get your dream life.
         </p>
       </section>
 
