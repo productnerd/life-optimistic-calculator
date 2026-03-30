@@ -6,7 +6,7 @@ import { createDefaultInputs } from "@/types";
 import type { DreamInputs } from "@/types";
 import { runSimulation } from "@/engine";
 import { estimatePrice } from "@/ai";
-import { Heart } from "lucide-react";
+import { Heart, Maximize2, Minimize2 } from "lucide-react";
 
 function App() {
   const [inputs, setInputs] = useState<DreamInputs>(() => {
@@ -113,6 +113,7 @@ function App() {
   const [apiKey, setApiKey] = useState<string | null>(() =>
     localStorage.getItem("claude-api-key")
   );
+  const [expanded, setExpanded] = useState(false);
 
   const updateInputs = useCallback((newInputs: DreamInputs) => {
     setInputs(newInputs);
@@ -173,9 +174,9 @@ function App() {
 
       {/* Main Content */}
       <main className="w-full px-6 py-8">
-        <div className="grid lg:grid-cols-[1fr_1.2fr] gap-8">
+        <div className={`grid gap-8 transition-all duration-500 ${expanded ? "lg:grid-cols-[0fr_1fr]" : "lg:grid-cols-[1fr_1.2fr]"}`}>
           {/* Left: Inputs */}
-          <div>
+          <div className={`transition-all duration-500 ${expanded ? "overflow-hidden opacity-0 max-w-0 min-w-0" : "opacity-100"}`}>
             <InputSections
               inputs={inputs}
               onChange={updateInputs}
@@ -185,7 +186,25 @@ function App() {
           </div>
 
           {/* Right: Results */}
-          <div className="lg:sticky lg:top-24 lg:self-start">
+          <div className={`${expanded ? "" : "lg:sticky lg:top-24 lg:self-start"}`}>
+            <div className="flex justify-end mb-4">
+              <button
+                onClick={() => setExpanded(!expanded)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground bg-card border border-border/50 hover:border-border transition-all"
+              >
+                {expanded ? (
+                  <>
+                    <Minimize2 className="h-3.5 w-3.5" />
+                    Show Inputs
+                  </>
+                ) : (
+                  <>
+                    <Maximize2 className="h-3.5 w-3.5" />
+                    Expand Charts
+                  </>
+                )}
+              </button>
+            </div>
             <ResultsDashboard result={result} inputs={inputs} />
           </div>
         </div>
