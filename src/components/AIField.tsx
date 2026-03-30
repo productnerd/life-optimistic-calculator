@@ -66,7 +66,7 @@ export function AIField({
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          onBlur={handleEstimate}
+          onBlur={() => handleEstimate()}
           className="pr-10"
         />
         {item.isLoading && (
