@@ -85,7 +85,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
     age: s.age,
     "Net Worth": s.netWorth,
     "Portfolio": s.portfolioValue,
-    milestones: s.milestones,
+    milestones: s.milestones.filter(m => !m.includes("Mini-retirement")),
   }));
 
   // Collect all milestones
