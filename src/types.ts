@@ -6,6 +6,12 @@ export interface IncomeStream {
   linkedTo: string | null; // null = manual start, "dreamHome" | "holidayHome" | "business-0" etc.
 }
 
+export interface InvestmentAllocation {
+  name: string;
+  percentage: number; // % of invested amount going to this vehicle
+  expectedReturn: number; // % annual return
+}
+
 export interface ExpenseCategory {
   name: string;
   monthlyAmount: number;
@@ -32,7 +38,7 @@ export interface DreamInputs {
 
   // Investment
   investmentPercentage: number; // % of salary invested
-  expectedReturn: number; // % annual return
+  investmentAllocations: InvestmentAllocation[]; // how invested money is split
   inflationRate: number;
 
   // Housing
@@ -138,7 +144,11 @@ export function createDefaultInputs(): DreamInputs {
     partnerSalary: null,
     partnerSalaryGrowth: 2,
     investmentPercentage: 15,
-    expectedReturn: 7,
+    investmentAllocations: [
+      { name: "Stocks (Index Funds)", percentage: 70, expectedReturn: 7 },
+      { name: "Bonds", percentage: 20, expectedReturn: 3 },
+      { name: "Cash / Savings", percentage: 10, expectedReturn: 1.5 },
+    ],
     inflationRate: 2.5,
     dreamHome: { description: "", estimatedPrice: 350000, isLoading: false },
     monthlyRent: 900,

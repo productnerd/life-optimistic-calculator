@@ -516,16 +516,102 @@ export function InputSections({
                   unit="%"
                   description={`Max ${cappedMax}% based on your expenses`}
                 />
-                <SliderField
-                  label="Expected Annual Return"
-                  value={inputs.expectedReturn}
-                  onChange={(v) => update({ expectedReturn: v })}
-                  min={1}
-                  max={15}
-                  step={0.5}
-                  unit="%"
-                  description="S&P 500 historical average is ~7% after inflation"
-                />
+                <Separator />
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium">Investment Allocation</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => {
+                        update({
+                          investmentAllocations: [
+                            ...inputs.investmentAllocations,
+                            { name: "", percentage: 0, expectedReturn: 5 },
+                          ],
+                        });
+                      }}
+                    >
+                      <Plus className="h-3 w-3 mr-1" /> Add
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    How your invested {effectiveValue}% is split across asset classes
+                  </p>
+                  <div className="space-y-2">
+                    {inputs.investmentAllocations.map((alloc, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <Input
+                          type="text"
+                          placeholder="e.g. Stocks"
+                          value={alloc.name}
+                          onChange={(e) => {
+                            const updated = [...inputs.investmentAllocations];
+                            updated[i] = { ...updated[i], name: e.target.value };
+                            update({ investmentAllocations: updated });
+                          }}
+                          className="flex-1"
+                        />
+                        <div className="relative w-20">
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            value={alloc.percentage || ""}
+                            onChange={(e) => {
+                              const updated = [...inputs.investmentAllocations];
+                              updated[i] = { ...updated[i], percentage: Number(e.target.value) };
+                              update({ investmentAllocations: updated });
+                            }}
+                            className="pr-6"
+                          />
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+                        </div>
+                        <div className="relative w-20">
+                          <Input
+                            type="number"
+                            placeholder="7"
+                            value={alloc.expectedReturn || ""}
+                            onChange={(e) => {
+                              const updated = [...inputs.investmentAllocations];
+                              updated[i] = { ...updated[i], expectedReturn: Number(e.target.value) };
+                              update({ investmentAllocations: updated });
+                            }}
+                            className="pr-10"
+                          />
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%/yr</span>
+                        </div>
+                        {inputs.investmentAllocations.length > 1 && (
+                          <button
+                            onClick={() => {
+                              update({
+                                investmentAllocations: inputs.investmentAllocations.filter((_, j) => j !== i),
+                              });
+                            }}
+                            className="text-muted-foreground hover:text-destructive transition-colors"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {(() => {
+                    const totalPct = inputs.investmentAllocations.reduce((s, a) => s + a.percentage, 0);
+                    const blended = totalPct > 0
+                      ? inputs.investmentAllocations.reduce((s, a) => s + (a.percentage / totalPct) * a.expectedReturn, 0)
+                      : 0;
+                    return (
+                      <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                        <span className={totalPct !== 100 ? "text-amber-500 font-medium" : ""}>
+                          Total: {totalPct}%{totalPct !== 100 ? " (should be 100%)" : ""}
+                        </span>
+                        <span>Blended return: <span className="text-foreground font-medium">{blended.toFixed(1)}%/yr</span></span>
+                      </div>
+                    );
+                  })()}
+                </div>
+                <Separator />
                 <SliderField
                   label="Inflation Rate"
                   value={inputs.inflationRate}

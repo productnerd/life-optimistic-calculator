@@ -113,6 +113,15 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
   );
   const bigPurchaseAnnual = totalBigPurchases / Math.min(10, workingYearsCount);
 
+  // Blended investment return from allocation mix
+  const totalAllocPct = inputs.investmentAllocations.reduce((s, a) => s + a.percentage, 0);
+  const blendedReturn = totalAllocPct > 0
+    ? inputs.investmentAllocations.reduce(
+        (sum, a) => sum + (a.percentage / totalAllocPct) * (a.expectedReturn / 100),
+        0
+      )
+    : 0.07;
+
   const miniRetData = getMiniRetirementYears(inputs, workingYearsCount);
 
   let houseBoughtYear = -1;
@@ -180,7 +189,7 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     const pensionContribution = (baseSalary * workingFraction + partnerIncome) * (inputs.pensionContributionPercent / 100);
     const salary = grossSalary - taxes - pensionContribution;
 
-    const investmentIncome = portfolioValue * (inputs.expectedReturn / 100);
+    const investmentIncome = portfolioValue * blendedReturn;
 
     // Housing
     let housing = 0;
@@ -301,7 +310,7 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     }
     // Apply returns only on positive portfolio (can't earn returns on debt)
     if (portfolioValue > 0) {
-      portfolioValue *= 1 + inputs.expectedReturn / 100;
+      portfolioValue *= 1 + blendedReturn;
     }
 
     // Net worth = portfolio + home equity (tracks actual equity built up)
@@ -336,6 +345,14 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
         holidayHomeEquity = hhAppreciatedValue - hhRemainingMortgage;
       }
     }
+
+    // Car value (depreciates ~15% per year, replaced every 15 years)
+    const yearsSinceCarPurchase = y % 15;
+    const carPurchaseYear = y - yearsSinceCarPurchase;
+    const carPurchasePrice = carPurchaseYear === 0
+      ? carPrice
+      : carPrice * Math.pow(1 + inputs.inflationRate / 100, carPurchaseYear);
+    const carValue = carPurchasePrice * Math.pow(0.85, yearsSinceCarPurchase);
 
     // Family gifts (every X years while parents alive, until age 65)
     if (inputs.familyGiftAmount > 0 && inputs.familyGiftInterval > 0 && age < inheritanceAge) {
@@ -394,7 +411,7 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       totalExpenses: Math.round(totalExpenses),
       amountInvested: Math.round(investmentAmount),
       portfolioValue: Math.round(portfolioValue),
-      netWorth: Math.round(portfolioValue + homeEquity + holidayHomeEquity),
+      netWorth: Math.round(portfolioValue + homeEquity + holidayHomeEquity + carValue),
       isWorking,
       isMiniRetirement,
       milestones,

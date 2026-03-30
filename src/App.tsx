@@ -82,6 +82,13 @@ function App() {
         if (parsed.country === "Europe") {
           parsed.country = "Netherlands";
         }
+        // Migrate expectedReturn → investmentAllocations
+        if (parsed.expectedReturn !== undefined && !parsed.investmentAllocations) {
+          parsed.investmentAllocations = [
+            { name: "Stocks (Index Funds)", percentage: 100, expectedReturn: parsed.expectedReturn },
+          ];
+          delete parsed.expectedReturn;
+        }
         return { ...createDefaultInputs(), ...parsed };
       }
     } catch {}
