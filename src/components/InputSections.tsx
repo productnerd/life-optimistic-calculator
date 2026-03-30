@@ -387,7 +387,7 @@ export function InputSections({
                   <Link className="h-3 w-3 text-muted-foreground shrink-0" />
                   {hasLinkableAssets ? (
                     <select
-                      className="flex-1 rounded-md border border-input bg-background px-2 py-1 text-xs"
+                      className="flex-1 rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground appearance-none cursor-pointer hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-ring transition-colors"
                       value={stream.linkedTo ?? ""}
                       onChange={(e) => {
                         const updated = [...inputs.additionalIncome];

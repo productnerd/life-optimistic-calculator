@@ -84,7 +84,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
     "Net Worth": s.netWorth,
     "Portfolio": s.portfolioValue,
     milestones: s.milestones.filter(m =>
-      m.includes("home") || m.includes("retirement") || m.includes("Dream life") || m.includes("Retirement")
+      (m.includes("home") || m.includes("Retirement") || m.includes("Dream life")) && !m.includes("Mini-retirement")
     ),
   }));
 
@@ -397,7 +397,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
                   />
                 )}
                 {milestones
-                  .filter((m) => m.label.includes("home") || m.label.includes("retirement") || m.label.includes("Dream life"))
+                  .filter((m) => (m.label.includes("home") || m.label.includes("Retirement") || m.label.includes("Dream life")) && !m.label.includes("Mini-retirement"))
                   .map((m, i) => (
                     <ReferenceDot
                       key={i}

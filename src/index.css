@@ -46,6 +46,16 @@
     font-family: 'DM Sans', system-ui, sans-serif;
     margin: 0;
   }
+  select {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    color-scheme: dark;
+  }
+  select option {
+    background-color: #2A2018;
+    color: var(--color-foreground);
+    padding: 8px;
+  }
 }
 
 @theme inline {
