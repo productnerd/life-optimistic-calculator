@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   Card,
   CardContent,
@@ -21,21 +21,87 @@ import {
   Briefcase,
   Link,
 } from "lucide-react";
+import { Sparkles, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, X } from "lucide-react";
 import type { DreamInputs, AIPricedItem } from "@/types";
+import { estimateTaxes } from "@/ai";
 
 interface InputSectionsProps {
   inputs: DreamInputs;
   onChange: (inputs: DreamInputs) => void;
   onEstimate: (description: string, category: string) => Promise<number>;
+  apiKey: string | null;
+}
+
+function CountryTaxField({ inputs, update, apiKey }: { inputs: DreamInputs; update: (partial: Partial<DreamInputs>) => void; apiKey: string | null }) {
+  const [countryInput, setCountryInput] = useState(inputs.country);
+  const [isLoading, setIsLoading] = useState(false);
+  const [estimated, setEstimated] = useState(!!inputs.country);
+
+  const handleEstimate = async () => {
+    if (!countryInput.trim()) return;
+    setIsLoading(true);
+    try {
+      const result = await estimateTaxes(countryInput, inputs.annualSalary, apiKey);
+      update({
+        country: countryInput,
+        effectiveTaxRate: result.effectiveTaxRate,
+        pensionContributionPercent: result.pensionContributionPercent,
+      });
+      setEstimated(true);
+    } catch {
+      update({ country: countryInput });
+    }
+    setIsLoading(false);
+  };
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        <p className="text-sm font-medium">Country</p>
+        <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+      </div>
+      <div className="relative">
+        <Input
+          type="text"
+          placeholder='e.g. "Netherlands", "USA", "Portugal"'
+          value={countryInput}
+          onChange={(e) => {
+            setCountryInput(e.target.value);
+            setEstimated(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleEstimate();
+            }
+          }}
+          onBlur={handleEstimate}
+          className="pr-10"
+        />
+        {isLoading && (
+          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+        )}
+        {!isLoading && estimated && countryInput && (
+          <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+        )}
+      </div>
+      {estimated && countryInput && (
+        <p className="text-xs text-muted-foreground mt-1.5">
+          Based on €{inputs.annualSalary.toLocaleString()} salary in {countryInput}: <span className="text-foreground font-medium">{inputs.effectiveTaxRate}% tax</span>, <span className="text-foreground font-medium">{inputs.pensionContributionPercent}% pension</span>
+        </p>
+      )}
+    </div>
+  );
 }
 
 export function InputSections({
   inputs,
   onChange,
   onEstimate,
+  apiKey,
 }: InputSectionsProps) {
   const update = (partial: Partial<DreamInputs>) =>
     onChange({ ...inputs, ...partial });
@@ -157,37 +223,7 @@ export function InputSections({
           />
           <Separator />
           {/* Country & Tax */}
-          <div>
-            <p className="text-sm font-medium mb-2">Country</p>
-            <Input
-              type="text"
-              placeholder="e.g. Netherlands, USA, Germany..."
-              value={inputs.country}
-              onChange={(e) => {
-                const country = e.target.value;
-                const taxRates: Record<string, number> = {
-                  "netherlands": 37, "germany": 35, "france": 30, "uk": 27,
-                  "united kingdom": 27, "spain": 24, "italy": 33, "portugal": 23, "belgium": 40,
-                  "sweden": 32, "denmark": 36, "norway": 33, "finland": 31,
-                  "ireland": 27, "austria": 34, "switzerland": 22, "usa": 24,
-                  "united states": 24, "canada": 26, "australia": 24, "japan": 30,
-                  "south korea": 25, "brazil": 27, "mexico": 25, "india": 26,
-                  "singapore": 15, "hong kong": 15, "new zealand": 28, "greece": 29,
-                  "poland": 25, "czech republic": 23, "romania": 16, "hungary": 15,
-                  "croatia": 24, "bulgaria": 10, "cyprus": 17, "malta": 25,
-                  "luxembourg": 38, "iceland": 31, "estonia": 20, "latvia": 23,
-                  "lithuania": 20, "slovenia": 27, "slovakia": 21,
-                };
-                const matchedRate = taxRates[country.toLowerCase().trim()];
-                if (matchedRate !== undefined) {
-                  update({ country, effectiveTaxRate: matchedRate });
-                } else {
-                  update({ country });
-                }
-              }}
-            />
-            <p className="text-xs text-muted-foreground mt-1">Tax rate auto-adjusts when a known country is entered</p>
-          </div>
+          <CountryTaxField inputs={inputs} update={update} apiKey={apiKey} />
           <div className="grid grid-cols-2 gap-4">
             <SliderField
               label="Effective Tax Rate"

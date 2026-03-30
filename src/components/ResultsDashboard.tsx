@@ -116,7 +116,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
               const achieved = yearlySnapshots
                 .filter(s => s.age <= dreamLifeAchievableAge)
                 .flatMap(s => s.milestones.filter(m =>
-                  m.includes("Bought") || m.includes("Started") || m.includes("born") || m.includes("Dream life") || m.includes("Mortgage paid")
+                  m.includes("Bought") || m.includes("Started") || m.includes("born") || m.includes("Mortgage paid")
                 ));
               // Deduplicate
               const uniqueAchieved = [...new Set(achieved)];

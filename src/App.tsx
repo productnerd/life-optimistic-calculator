@@ -156,6 +156,7 @@ function App() {
               inputs={inputs}
               onChange={updateInputs}
               onEstimate={handleEstimate}
+              apiKey={apiKey}
             />
           </div>
 
