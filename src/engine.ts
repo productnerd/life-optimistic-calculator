@@ -213,9 +213,7 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     } else if (y - houseBoughtYear < inputs.mortgageTerm) {
       housing = annualMortgage;
     } else {
-      if (y - houseBoughtYear === inputs.mortgageTerm) {
-        milestones.push("🎉 Mortgage paid off!");
-      }
+      // Mortgage paid off (no milestone dot)
       housing = 2000 * inflationMultiplier;
     }
 
@@ -231,7 +229,6 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       const replacementCost = carPrice * inflationMultiplier;
       if (cashBalance >= replacementCost) {
         cashBalance -= replacementCost;
-        milestones.push("🚗 Replaced car");
       }
     }
 
@@ -283,7 +280,6 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       if (yearsOwned > 0 && yearsOwned % 20 === 0) {
         const renovationCost = homePrice * 0.1 * inflationMultiplier;
         housing += renovationCost;
-        milestones.push("🔨 Home renovation");
       }
     }
 
@@ -293,7 +289,6 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       const kidStartAge = inputs.kidsAges[k] ?? -2 * (k + 1);
       const kidCurrentAge = kidStartAge + y;
       if (kidCurrentAge === 0) milestones.push(`👶 Child ${k + 1} born!`);
-      if (kidCurrentAge === 18) milestones.push(`🎓 Child ${k + 1} starts university`);
       kidsCosts += childYearlyCost(kidCurrentAge) * inflationMultiplier;
     }
 
@@ -389,14 +384,12 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     if (inputs.familyGiftAmount > 0 && inputs.familyGiftInterval > 0 && age < inheritanceAge) {
       if (y > 0 && y % inputs.familyGiftInterval === 0) {
         cashBalance += inputs.familyGiftAmount;
-        milestones.push("🎁 Family gift received");
       }
     }
 
     // Inheritance lump sum
     if (inputs.expectedInheritance > 0 && age === inheritanceAge) {
       cashBalance += inputs.expectedInheritance;
-      milestones.push("💰 Received inheritance");
     }
 
     totalLifetimeCost += totalExpenses;
@@ -406,22 +399,12 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     const canAfford = totalIncome >= totalExpenses;
     if (dreamLifeAchievableAge === null && canAfford && hasCorePurchases) {
       dreamLifeAchievableAge = age;
-      milestones.push("⭐ Dream life achievable!");
     }
 
     // Dream entrepreneurial life: same + businesses started
     const businessesStarted = totalBusinessCost === 0 || y >= 2;
     if (dreamEntrepreneurialAge === null && canAfford && hasCorePurchases && businessesStarted && totalBusinessCost > 0) {
       dreamEntrepreneurialAge = age;
-      milestones.push("🚀 Entrepreneurial dream achieved!");
-    }
-
-    if (miniRetData.startYears.has(y)) {
-      milestones.push(`🌴 Mini-retirement (${inputs.miniRetirementDuration}mo)`);
-    }
-
-    if (age === inputs.targetRetireAge) {
-      milestones.push("🎯 Retirement — no salary!");
     }
 
     snapshots.push({

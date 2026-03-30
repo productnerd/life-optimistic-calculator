@@ -85,7 +85,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
     age: s.age,
     "Net Worth": s.netWorth,
     "Portfolio": s.portfolioValue,
-    milestones: s.milestones.filter(m => !m.includes("Mini-retirement")),
+    milestones: s.milestones,
   }));
 
   // Collect all milestones
@@ -399,7 +399,6 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
                   />
                 )}
                 {milestones
-                  .filter((m) => !m.label.includes("Mini-retirement"))
                   .map((m, i) => {
                     const color = m.label.includes("Dream life") || m.label.includes("Entrepreneurial")
                       ? "#C4A882"
