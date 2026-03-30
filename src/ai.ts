@@ -1,3 +1,91 @@
+// Annual costs for hobbies/activities (EUR per year)
+const HOBBY_ANNUAL_COSTS: Record<string, number> = {
+  // Sports - Team
+  football: 500, soccer: 500, basketball: 600, volleyball: 400, rugby: 600,
+  hockey: 1200, "ice hockey": 1500, cricket: 500, baseball: 600, softball: 400,
+  handball: 400, "water polo": 800, lacrosse: 700, "field hockey": 500,
+  // Sports - Individual
+  tennis: 1500, padel: 1200, badminton: 600, squash: 800, "table tennis": 400,
+  golf: 3000, swimming: 800, running: 500, cycling: 1200, triathlon: 2000,
+  boxing: 1000, kickboxing: 900, "muay thai": 1000, mma: 1200, karate: 800,
+  judo: 700, "brazilian jiu-jitsu": 1200, bjj: 1200, taekwondo: 800, fencing: 1000,
+  wrestling: 600, "martial arts": 900, "kung fu": 800,
+  climbing: 1500, "rock climbing": 1500, bouldering: 1000, mountaineering: 2500,
+  skiing: 3000, snowboarding: 2500, "cross-country skiing": 1500,
+  surfing: 1500, kitesurfing: 2500, windsurfing: 2000, wakeboarding: 1500,
+  sailing: 4000, rowing: 1200, canoeing: 800, kayaking: 800, paddleboarding: 600,
+  diving: 2000, "scuba diving": 2500, snorkeling: 500,
+  skating: 600, "ice skating": 800, "roller skating": 500, skateboarding: 400,
+  archery: 1000, shooting: 1500, "target shooting": 1200,
+  athletics: 500, "track and field": 500, gymnastics: 1200, trampolining: 600,
+  // Fitness
+  gym: 600, crossfit: 1500, pilates: 1200, yoga: 1000, "hot yoga": 1500,
+  "personal trainer": 3000, "personal training": 3000, fitness: 700,
+  weightlifting: 600, powerlifting: 800, bodybuilding: 1000, calisthenics: 400,
+  spinning: 1000, aerobics: 600, zumba: 600, "pole dancing": 1000, barre: 1200,
+  // Water
+  "scuba": 2500, fishing: 1000, "fly fishing": 1500, spearfishing: 1200,
+  // Outdoor & Adventure
+  hiking: 500, trekking: 1000, camping: 800, backpacking: 1500,
+  "horse riding": 3500, horseback: 3500, equestrian: 4000, polo: 8000,
+  skydiving: 3000, paragliding: 2500, "hang gliding": 2000, parachuting: 3000,
+  "bungee jumping": 500, "base jumping": 3000,
+  "mountain biking": 1500, motocross: 3000,
+  hunting: 2000, "bird watching": 300, orienteering: 400,
+  // Music
+  piano: 1500, "piano lessons": 1800, guitar: 1000, "guitar lessons": 1200,
+  violin: 1500, "violin lessons": 1800, cello: 1500, drums: 1200,
+  singing: 1200, "voice lessons": 1500, "vocal coaching": 2000,
+  saxophone: 1200, trumpet: 1000, flute: 1000, clarinet: 1000,
+  "music lessons": 1500, "music production": 1000, dj: 800, djing: 800,
+  choir: 300, orchestra: 500, "band": 600,
+  // Arts & Crafts
+  painting: 800, drawing: 500, "oil painting": 1000, watercolor: 600,
+  sculpture: 1000, pottery: 800, ceramics: 900, woodworking: 1200,
+  knitting: 300, crochet: 250, sewing: 500, quilting: 500, embroidery: 300,
+  calligraphy: 400, "leather crafting": 600, "jewelry making": 700,
+  photography: 1500, "film photography": 2000, videography: 1200,
+  "graphic design": 500, "digital art": 400, "3d printing": 800,
+  // Dance
+  dance: 1000, ballet: 1200, salsa: 800, tango: 900, "ballroom dancing": 1000,
+  "contemporary dance": 1000, "hip hop dance": 800, "flamenco": 900,
+  "swing dancing": 700, "latin dance": 800, breakdancing: 600,
+  // Mind & Strategy
+  chess: 300, "board games": 400, "video games": 600, gaming: 800,
+  poker: 1000, bridge: 300, "escape rooms": 500,
+  // Languages & Learning
+  "language course": 800, "language lessons": 1000, "spanish lessons": 1000,
+  "french lessons": 1000, "german lessons": 1000, "japanese lessons": 1200,
+  "chinese lessons": 1200, "italian lessons": 1000, "arabic lessons": 1200,
+  coding: 500, programming: 500, "online courses": 600, "book club": 200,
+  // Wellness & Mindfulness
+  meditation: 500, "tai chi": 600, qigong: 500, reiki: 800,
+  massage: 1500, "spa membership": 2000, "float tank": 1000,
+  // Social & Entertainment
+  "wine tasting": 1500, "wine club": 1000, "beer brewing": 600, "home brewing": 500,
+  cooking: 800, "cooking class": 1200, "baking": 500, "cocktail making": 600,
+  "book club": 200, reading: 300, writing: 300, "creative writing": 500,
+  blogging: 200, vlogging: 500, podcasting: 800, streaming: 600,
+  "stand-up comedy": 500, "improv": 600, acting: 1000, theater: 800,
+  // Collecting
+  "stamp collecting": 500, "coin collecting": 1000, "card collecting": 800,
+  "antiques": 2000, "vintage": 1500, "art collecting": 5000,
+  // Motorsport
+  karting: 3000, "go-kart": 2000, "car racing": 5000, "track days": 3000,
+  "sim racing": 800, rallying: 5000,
+  // Flying
+  flying: 8000, "flight lessons": 10000, "private pilot": 12000,
+  "drone flying": 800, "model aircraft": 600,
+  // Animals
+  "dog training": 800, "dog agility": 600, "pet care": 1000,
+  "bird keeping": 500, aquarium: 600, "fish keeping": 500,
+  // Garden
+  gardening: 500, "vegetable garden": 400, bonsai: 600, "bee keeping": 800,
+  // Misc
+  astronomy: 600, "star gazing": 300, "metal detecting": 500, geocaching: 300,
+  "magic tricks": 400, juggling: 200, circus: 800,
+};
+
 const FALLBACK_PRICES: Record<string, Record<string, number>> = {
   car: {
     default: 25000,
@@ -21,6 +109,10 @@ const FALLBACK_PRICES: Record<string, Record<string, number>> = {
     "ford mustang": 45000, "ford": 30000, "jeep": 40000, "jeep wrangler": 50000,
     ferrari: 250000, lamborghini: 250000, maserati: 90000, "aston martin": 160000,
     lexus: 45000, infiniti: 40000, jaguar: 55000, bentley: 200000, "rolls royce": 350000,
+    // Vintage & Classic
+    "alfa romeo": 45000, "alfa romeo gt": 65000, "alfa romeo spider": 55000,
+    "vintage": 45000, "classic": 40000, "1960s": 55000, "1970s": 45000, "1950s": 70000,
+    "mv agusta": 15000, "cafe racer bmw": 18000,
   },
   "residential property": {
     default: 300000,
@@ -114,9 +206,31 @@ const FALLBACK_PRICES: Record<string, Record<string, number>> = {
 function getFallbackPrice(description: string, category: string): number {
   const desc = description.toLowerCase();
 
+  // For hobbies, search the dedicated hobby annual cost database first
+  if (category === "hobby") {
+    // Try longest match first for specificity (e.g. "piano lessons" before "piano")
+    const sortedEntries = Object.entries(HOBBY_ANNUAL_COSTS).sort(
+      (a, b) => b[0].length - a[0].length
+    );
+    for (const [key, price] of sortedEntries) {
+      if (desc.includes(key)) {
+        return price;
+      }
+    }
+    // Generic hobby fallback: cheap/moderate/expensive keyword detection
+    if (/lesson|class|course|coach|train/.test(desc)) return 1200;
+    if (/membership|club|subscription/.test(desc)) return 800;
+    if (/extreme|adventure|flying|aviation|pilot/.test(desc)) return 5000;
+    if (/water|boat|marine|nautical/.test(desc)) return 2000;
+    if (/motor|racing|speed/.test(desc)) return 3000;
+    return 800; // reasonable default for an annual hobby cost
+  }
+
   // First try the specified category
   const catPrices = FALLBACK_PRICES[category] ?? {};
-  for (const [key, price] of Object.entries(catPrices)) {
+  // Sort by key length descending for better specificity
+  const sortedCat = Object.entries(catPrices).sort((a, b) => b[0].length - a[0].length);
+  for (const [key, price] of sortedCat) {
     if (key !== "default" && desc.includes(key)) {
       return price;
     }
@@ -124,8 +238,9 @@ function getFallbackPrice(description: string, category: string): number {
 
   // Then search ALL categories for a match
   for (const [cat, prices] of Object.entries(FALLBACK_PRICES)) {
-    if (cat === category) continue; // already checked
-    for (const [key, price] of Object.entries(prices)) {
+    if (cat === category) continue;
+    const sorted = Object.entries(prices).sort((a, b) => b[0].length - a[0].length);
+    for (const [key, price] of sorted) {
       if (key !== "default" && desc.includes(key)) {
         return price;
       }
@@ -327,9 +442,9 @@ export async function estimatePrice(
         messages: [
           {
             role: "user",
-            content: `You are a price estimation assistant. Estimate the current market price in EUR for: "${description}" (category: ${category}).
-
-Consider the European market. Respond with ONLY a JSON object: {"price": <number>}. No other text.`,
+            content: category === "hobby"
+              ? `You are a cost estimation assistant. Estimate the ANNUAL cost in EUR for someone doing "${description}" as a hobby/activity in Europe. Include membership fees, equipment maintenance, lessons, club fees, consumables — everything needed for a year of regular participation. Respond with ONLY a JSON object: {"price": <number>}. No other text.`
+              : `You are a price estimation assistant. Estimate the current market price in EUR for: "${description}" (category: ${category}). Consider the European market. Respond with ONLY a JSON object: {"price": <number>}. No other text.`,
           },
         ],
       }),

@@ -1077,7 +1077,7 @@ export function InputSections({
                       updated[i] = item;
                       update({ hobbies: updated });
                     }}
-                    onEstimate={(desc) => onEstimate(desc, "luxury item")}
+                    onEstimate={(desc) => onEstimate(desc, "hobby")}
                   />
                 </div>
                 <Button
