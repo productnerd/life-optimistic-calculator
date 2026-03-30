@@ -36,15 +36,25 @@ function formatCurrency(n: number): string {
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
+  const milestones: string[] = payload[0]?.payload?.milestones ?? [];
   return (
     <div className="rounded-lg border bg-card p-3 shadow-md text-sm">
       <p className="font-semibold mb-1">Age {label}</p>
       {payload.map((entry: any) => (
-        <div key={entry.name} className="flex justify-between gap-4">
-          <span style={{ color: entry.color }}>{entry.name}</span>
-          <span className="font-mono">{formatCurrency(entry.value)}</span>
-        </div>
+        entry.name !== "milestones" && (
+          <div key={entry.name} className="flex justify-between gap-4">
+            <span style={{ color: entry.color }}>{entry.name}</span>
+            <span className="font-mono">{formatCurrency(entry.value)}</span>
+          </div>
+        )
       ))}
+      {milestones.length > 0 && (
+        <div className="mt-2 pt-2 border-t border-border/50 space-y-0.5">
+          {milestones.map((m, i) => (
+            <p key={i} className="text-xs text-primary">{m}</p>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -73,6 +83,9 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
     age: s.age,
     "Net Worth": s.netWorth,
     "Portfolio": s.portfolioValue,
+    milestones: s.milestones.filter(m =>
+      m.includes("home") || m.includes("retirement") || m.includes("Dream life") || m.includes("Retirement")
+    ),
   }));
 
   // Collect all milestones
@@ -402,10 +415,8 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
                           fill={m.label.includes("Dream life") ? "#C4A882" : "#A69076"}
                           stroke="#fff"
                           strokeWidth={2}
-                          style={{ cursor: "pointer" }}
-                        >
-                          <title>{`Age ${m.age}: ${m.label}`}</title>
-                        </circle>
+                          style={{ cursor: "pointer", pointerEvents: "none" }}
+                        />
                       )}
                     />
                   ))}
