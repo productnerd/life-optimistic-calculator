@@ -1040,6 +1040,72 @@ export function InputSections({
               </p>
             )}
           </div>
+
+          {/* Hobbies */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-1">
+              <h4 className="font-semibold text-sm">Hobbies & Recurring Activities</h4>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs"
+                onClick={() =>
+                  update({
+                    hobbies: [
+                      ...inputs.hobbies,
+                      createAIPricedItem(),
+                    ],
+                  })
+                }
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">
+              Annual costs for hobbies — e.g. "golf membership", "sailing club", "music lessons"
+            </p>
+            {inputs.hobbies.map((hobby, i) => (
+              <div key={hobby.id} className="flex items-center gap-2">
+                <div className="flex-1">
+                  <AIField
+                    label=""
+                    placeholder='e.g. "Golf membership" or "Piano lessons"'
+                    item={hobby}
+                    onChange={(item) => {
+                      const updated = [...inputs.hobbies];
+                      updated[i] = item;
+                      update({ hobbies: updated });
+                    }}
+                    onEstimate={(desc) => onEstimate(desc, "luxury item")}
+                  />
+                </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive mt-2"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    const updated = inputs.hobbies.filter(
+                      (_, idx) => idx !== i
+                    );
+                    update({ hobbies: updated });
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+            {inputs.hobbies.length > 0 && (
+              <p className="text-xs text-muted-foreground text-right">
+                Total: €
+                {inputs.hobbies
+                  .reduce((s, p) => s + (p.estimatedPrice ?? 0), 0)
+                  .toLocaleString()}
+                /yr
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
 

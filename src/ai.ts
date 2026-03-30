@@ -113,11 +113,22 @@ const FALLBACK_PRICES: Record<string, Record<string, number>> = {
 
 function getFallbackPrice(description: string, category: string): number {
   const desc = description.toLowerCase();
-  const catPrices = FALLBACK_PRICES[category] ?? {};
 
+  // First try the specified category
+  const catPrices = FALLBACK_PRICES[category] ?? {};
   for (const [key, price] of Object.entries(catPrices)) {
     if (key !== "default" && desc.includes(key)) {
       return price;
+    }
+  }
+
+  // Then search ALL categories for a match
+  for (const [cat, prices] of Object.entries(FALLBACK_PRICES)) {
+    if (cat === category) continue; // already checked
+    for (const [key, price] of Object.entries(prices)) {
+      if (key !== "default" && desc.includes(key)) {
+        return price;
+      }
     }
   }
 
