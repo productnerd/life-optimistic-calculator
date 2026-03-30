@@ -263,14 +263,16 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
             <p className="text-xs text-muted-foreground mt-1">homes, cars, businesses</p>
             {expandedCard === "assets" && (() => {
               const homePrice = inputs.dreamHome.estimatedPrice ?? 300000;
-              const hhPrice = inputs.holidayHome?.estimatedPrice ?? 0;
+              const additionalPropsTotal = inputs.additionalProperties.reduce((s, p) => s + (p.estimatedPrice ?? 0), 0);
               const totalBusinessCost = inputs.businesses.reduce((s, b) => s + (b.estimatedPrice ?? 0), 0);
               const totalBigPurchases = inputs.bigPurchases.reduce((s, p) => s + (p.estimatedPrice ?? 0), 0);
-              const carCosts = totalAssetsCost - homePrice - hhPrice - totalBusinessCost - totalBigPurchases;
+              const carCosts = totalAssetsCost - homePrice - additionalPropsTotal - totalBusinessCost - totalBigPurchases;
               return (
                 <div className="card-breakdown mt-3 pt-3 border-t border-border/50 space-y-1.5 text-xs text-muted-foreground">
                   <div className="flex justify-between"><span>Dream home</span><span className="font-mono text-foreground">{formatCurrency(homePrice)}</span></div>
-                  {hhPrice > 0 && <div className="flex justify-between"><span>Holiday home</span><span className="font-mono text-foreground">{formatCurrency(hhPrice)}</span></div>}
+                  {inputs.additionalProperties.map((p, i) => (
+                    p.estimatedPrice ? <div key={i} className="flex justify-between"><span>{p.description || `Property ${i + 1}`}</span><span className="font-mono text-foreground">{formatCurrency(p.estimatedPrice)}</span></div> : null
+                  ))}
                   <div className="flex justify-between"><span>Cars (incl. replacements)</span><span className="font-mono text-foreground">{formatCurrency(Math.max(0, carCosts))}</span></div>
                   {totalBusinessCost > 0 && <div className="flex justify-between"><span>Businesses</span><span className="font-mono text-foreground">{formatCurrency(totalBusinessCost)}</span></div>}
                   {totalBigPurchases > 0 && <div className="flex justify-between"><span>Big purchases</span><span className="font-mono text-foreground">{formatCurrency(totalBigPurchases)}</span></div>}

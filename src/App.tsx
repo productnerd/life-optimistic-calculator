@@ -89,6 +89,11 @@ function App() {
           ];
           delete parsed.expectedReturn;
         }
+        // Migrate holidayHome → additionalProperties
+        if (parsed.holidayHome !== undefined && !parsed.additionalProperties) {
+          parsed.additionalProperties = parsed.holidayHome ? [parsed.holidayHome] : [];
+          delete parsed.holidayHome;
+        }
         return { ...createDefaultInputs(), ...parsed };
       }
     } catch {}

@@ -3,7 +3,7 @@ export interface IncomeStream {
   monthlyAmount: number;
   annualGrowthRate: number; // % per year
   startsInYears: number; // 0 = now, 3 = starts in 3 years (ignored if linkedTo is set)
-  linkedTo: string | null; // null = manual start, "dreamHome" | "holidayHome" | "business-0" etc.
+  linkedTo: string | null; // null = manual start, "dreamHome" | "property-0" | "business-0" etc.
 }
 
 export interface InvestmentAllocation {
@@ -47,7 +47,7 @@ export interface DreamInputs {
   mortgageRate: number;
   mortgageTerm: number; // years
   downPaymentPercent: number;
-  holidayHome: AIPricedItem | null;
+  additionalProperties: AIPricedItem[];
 
   // Car
   dreamCar: AIPricedItem;
@@ -155,7 +155,7 @@ export function createDefaultInputs(): DreamInputs {
     mortgageRate: 3.5,
     mortgageTerm: 30,
     downPaymentPercent: 15,
-    holidayHome: null,
+    additionalProperties: [],
     dreamCar: { description: "", estimatedPrice: 20000, isLoading: false },
     annualCarCosts: 2500,
     numberOfKids: 0,

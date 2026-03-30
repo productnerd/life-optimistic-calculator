@@ -78,21 +78,19 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       : loanAmount / numPayments;
   const annualMortgage = monthlyMortgage * 12;
 
-  // Holiday home mortgage
-  let annualHolidayMortgage = 0;
-  if (inputs.holidayHome?.estimatedPrice) {
-    const hhPrice = inputs.holidayHome.estimatedPrice;
-    const hhDown = hhPrice * (inputs.downPaymentPercent / 100);
-    const hhLoan = hhPrice - hhDown;
-    const hhMonthly =
-      monthlyMortgageRate > 0
-        ? (hhLoan *
-            (monthlyMortgageRate *
-              Math.pow(1 + monthlyMortgageRate, numPayments))) /
+  // Additional properties — compute mortgage for each
+  const additionalPropertyData = inputs.additionalProperties
+    .filter(p => p.estimatedPrice && p.estimatedPrice > 0)
+    .map(p => {
+      const price = p.estimatedPrice!;
+      const down = price * (inputs.downPaymentPercent / 100);
+      const loan = price - down;
+      const monthly = monthlyMortgageRate > 0
+        ? (loan * (monthlyMortgageRate * Math.pow(1 + monthlyMortgageRate, numPayments))) /
           (Math.pow(1 + monthlyMortgageRate, numPayments) - 1)
-        : hhLoan / numPayments;
-    annualHolidayMortgage = hhMonthly * 12;
-  }
+        : loan / numPayments;
+      return { price, down, loan, annualMortgage: monthly * 12, boughtYear: -1, description: p.description };
+    });
 
   const carPrice = inputs.dreamCar.estimatedPrice ?? 25000;
 
@@ -125,7 +123,6 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
   const miniRetData = getMiniRetirementYears(inputs, workingYearsCount);
 
   let houseBoughtYear = -1;
-  let holidayHomeBoughtYear = -1;
   let dreamLifeAchievableAge: number | null = null;
   let dreamEntrepreneurialAge: number | null = null;
   const inheritanceAge = 65; // parents 25 at birth, live to 90
@@ -154,9 +151,11 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
           if (s.linkedTo === "dreamHome") {
             if (houseBoughtYear < 0) return sum; // not bought yet
             startYear = houseBoughtYear;
-          } else if (s.linkedTo === "holidayHome") {
-            if (holidayHomeBoughtYear < 0) return sum;
-            startYear = holidayHomeBoughtYear;
+          } else if (s.linkedTo.startsWith("property-")) {
+            const propIdx = parseInt(s.linkedTo.split("-")[1], 10);
+            const prop = additionalPropertyData[propIdx];
+            if (!prop || prop.boughtYear < 0) return sum;
+            startYear = prop.boughtYear;
           } else if (s.linkedTo.startsWith("business-")) {
             // Businesses start in year 2
             if (y < 2) return sum;
@@ -213,29 +212,28 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       housing = 2000 * inflationMultiplier;
     }
 
-    // Holiday home
-    let holidayHousing = 0;
-    if (inputs.holidayHome?.estimatedPrice) {
-      const hhDownPayment =
-        inputs.holidayHome.estimatedPrice * (inputs.downPaymentPercent / 100);
-      if (holidayHomeBoughtYear < 0) {
+    // Additional properties
+    let additionalHousing = 0;
+    for (const prop of additionalPropertyData) {
+      if (prop.boughtYear < 0) {
         if (
           houseBoughtYear >= 0 &&
-          cashBalance >= hhDownPayment &&
-          y >= houseBoughtYear + 3
+          cashBalance >= prop.down &&
+          y >= houseBoughtYear + 2
         ) {
-          holidayHomeBoughtYear = y;
-          cashBalance -= hhDownPayment;
-          holidayHousing = annualHolidayMortgage;
-          milestones.push("🏖️ Bought holiday home!");
+          prop.boughtYear = y;
+          cashBalance -= prop.down;
+          additionalHousing += prop.annualMortgage;
+          const label = prop.description || "property";
+          milestones.push(`🏠 Bought ${label}!`);
         }
-      } else if (y - holidayHomeBoughtYear < inputs.mortgageTerm) {
-        holidayHousing = annualHolidayMortgage;
+      } else if (y - prop.boughtYear < inputs.mortgageTerm) {
+        additionalHousing += prop.annualMortgage;
       } else {
-        holidayHousing = 1500 * inflationMultiplier;
+        additionalHousing += 1500 * inflationMultiplier; // maintenance
       }
     }
-    housing += holidayHousing;
+    housing += additionalHousing;
 
     // Car — running costs are expenses, purchase price comes from cash
     let carExpenses = inputs.annualCarCosts * inflationMultiplier;
@@ -342,20 +340,19 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       }
     }
 
-    // Holiday home equity
-    let holidayHomeEquity = 0;
-    if (inputs.holidayHome?.estimatedPrice && holidayHomeBoughtYear >= 0) {
-      const hhPrice = inputs.holidayHome.estimatedPrice;
-      const hhYearsOwned = y - holidayHomeBoughtYear;
-      const hhAppreciatedValue = hhPrice * Math.pow(1 + inputs.inflationRate / 100, hhYearsOwned);
-      const hhDown = hhPrice * (inputs.downPaymentPercent / 100);
-      const hhLoan = hhPrice - hhDown;
-      if (hhYearsOwned >= inputs.mortgageTerm) {
-        holidayHomeEquity = hhAppreciatedValue;
-      } else {
-        const hhPrincipalPaid = (hhLoan / inputs.mortgageTerm) * hhYearsOwned;
-        const hhRemainingMortgage = hhLoan - hhPrincipalPaid;
-        holidayHomeEquity = hhAppreciatedValue - hhRemainingMortgage;
+    // Additional property equity
+    let additionalPropertyEquity = 0;
+    for (const prop of additionalPropertyData) {
+      if (prop.boughtYear >= 0) {
+        const yearsOwned = y - prop.boughtYear;
+        const appreciated = prop.price * Math.pow(1 + inputs.inflationRate / 100, yearsOwned);
+        if (yearsOwned >= inputs.mortgageTerm) {
+          additionalPropertyEquity += appreciated;
+        } else {
+          const principalPaid = (prop.loan / inputs.mortgageTerm) * yearsOwned;
+          const remaining = prop.loan - principalPaid;
+          additionalPropertyEquity += appreciated - remaining;
+        }
       }
     }
 
@@ -424,7 +421,7 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       totalExpenses: Math.round(totalExpenses),
       amountInvested: Math.round(investmentAmount),
       portfolioValue: Math.round(portfolioValue),
-      netWorth: Math.round(cashBalance + portfolioValue + homeEquity + holidayHomeEquity + carValue),
+      netWorth: Math.round(cashBalance + portfolioValue + homeEquity + additionalPropertyEquity + carValue),
       isWorking,
       isMiniRetirement,
       milestones,
@@ -455,7 +452,7 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
   }, 0);
   const totalAssetsCost =
     homePrice +
-    (inputs.holidayHome?.estimatedPrice ?? 0) +
+    inputs.additionalProperties.reduce((s, p) => s + (p.estimatedPrice ?? 0), 0) +
     Math.round(totalCarPurchases) +
     totalBigPurchases +
     totalBusinessCost;

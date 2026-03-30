@@ -1,52 +1,113 @@
 const FALLBACK_PRICES: Record<string, Record<string, number>> = {
   car: {
     default: 25000,
-    porsche: 55000,
-    "porsche 911": 65000,
-    bmw: 45000,
-    tesla: 40000,
-    "tesla model 3": 38000,
-    toyota: 25000,
-    honda: 22000,
-    mercedes: 50000,
-    audi: 42000,
-    volkswagen: 28000,
-    fiat: 18000,
-    volvo: 38000,
-    mini: 28000,
+    // Motorcycles
+    "cafe racer": 12000, motorcycle: 10000, "harley": 18000, "ducati": 16000,
+    vespa: 5000, scooter: 3000, "triumph": 12000, "indian": 20000,
+    // Cars
+    porsche: 55000, "porsche 911": 95000, "porsche cayenne": 80000, "porsche macan": 65000,
+    bmw: 45000, "bmw m3": 75000, "bmw x5": 65000, "bmw 3": 42000, "bmw 5": 55000,
+    tesla: 40000, "tesla model 3": 38000, "tesla model y": 45000, "tesla model s": 80000, "tesla model x": 90000,
+    toyota: 25000, "toyota corolla": 22000, "toyota camry": 28000, "toyota rav4": 32000, "toyota land cruiser": 65000,
+    honda: 22000, "honda civic": 24000, "honda cr-v": 32000,
+    mercedes: 50000, "mercedes c": 45000, "mercedes e": 60000, "mercedes s": 100000, "mercedes amg": 85000, "mercedes g": 130000,
+    audi: 42000, "audi a3": 35000, "audi a4": 42000, "audi a6": 55000, "audi q5": 50000, "audi rs": 85000,
+    volkswagen: 28000, "golf": 30000, "tiguan": 35000, "passat": 35000,
+    fiat: 18000, "fiat 500": 16000,
+    volvo: 38000, "volvo xc90": 60000, "volvo xc60": 48000,
+    mini: 28000, "mini cooper": 30000,
+    "range rover": 90000, "land rover": 55000, "defender": 60000,
+    mazda: 28000, subaru: 30000, kia: 25000, hyundai: 25000,
+    "ford mustang": 45000, "ford": 30000, "jeep": 40000, "jeep wrangler": 50000,
+    ferrari: 250000, lamborghini: 250000, maserati: 90000, "aston martin": 160000,
+    lexus: 45000, infiniti: 40000, jaguar: 55000, bentley: 200000, "rolls royce": 350000,
   },
   "residential property": {
     default: 300000,
-    lisbon: 350000,
-    porto: 280000,
-    london: 550000,
-    paris: 500000,
-    berlin: 400000,
-    amsterdam: 450000,
-    madrid: 320000,
-    barcelona: 380000,
-    rome: 350000,
-    milan: 420000,
-    dublin: 400000,
-    munich: 500000,
-    vienna: 380000,
-    zurich: 800000,
-    "new york": 700000,
-    stockholm: 400000,
-  },
-  "holiday property": {
-    default: 180000,
+    // Europe
+    lisbon: 350000, porto: 280000, algarve: 320000,
+    london: 550000, manchester: 280000, edinburgh: 300000, bristol: 350000,
+    paris: 500000, lyon: 300000, nice: 400000, bordeaux: 320000, marseille: 280000,
+    berlin: 400000, munich: 550000, hamburg: 400000, frankfurt: 450000, cologne: 350000,
+    amsterdam: 450000, rotterdam: 350000, utrecht: 380000, "the hague": 380000,
+    madrid: 320000, barcelona: 380000, valencia: 250000, malaga: 260000, seville: 220000,
+    rome: 350000, milan: 420000, florence: 380000, naples: 200000, bologna: 300000,
+    dublin: 400000, cork: 300000,
+    vienna: 380000, salzburg: 350000,
+    zurich: 800000, geneva: 750000, bern: 600000, basel: 550000,
+    stockholm: 400000, copenhagen: 420000, oslo: 450000, helsinki: 350000,
+    prague: 250000, warsaw: 200000, budapest: 180000, bucharest: 150000,
+    athens: 200000, thessaloniki: 160000,
+    // Americas
+    "new york": 700000, "san francisco": 800000, "los angeles": 650000, miami: 450000,
+    chicago: 350000, boston: 550000, seattle: 550000, austin: 400000, denver: 450000,
+    toronto: 600000, vancouver: 700000, montreal: 400000,
+    "mexico city": 200000, "buenos aires": 150000, "sao paulo": 250000,
+    // Asia/Pacific
+    tokyo: 500000, singapore: 800000, "hong kong": 900000, sydney: 700000, melbourne: 550000,
+    dubai: 400000, bangkok: 200000, bali: 250000,
+    // Generic
+    apartment: 250000, studio: 180000, cottage: 200000, villa: 500000, farmhouse: 350000,
+    penthouse: 600000, townhouse: 350000, loft: 300000, mansion: 1200000, flat: 250000,
+    countryside: 220000, "beach house": 400000, cabin: 150000, chalet: 350000,
   },
   "business startup cost": {
     default: 30000,
-    "coffee shop": 80000,
-    restaurant: 150000,
-    saas: 15000,
-    "online store": 10000,
-    consulting: 5000,
-    bakery: 60000,
-    gym: 100000,
-    "food truck": 50000,
+    "coffee shop": 80000, cafe: 70000, restaurant: 150000, bar: 100000, pub: 120000,
+    bakery: 60000, pizzeria: 100000, brewery: 200000, winery: 300000,
+    saas: 15000, "software": 20000, app: 25000, "mobile app": 30000, "web app": 15000,
+    "online store": 10000, "e-commerce": 15000, "dropshipping": 5000, etsy: 3000,
+    consulting: 5000, freelancing: 2000, coaching: 3000, agency: 15000,
+    gym: 100000, "fitness studio": 60000, yoga: 30000, "crossfit": 80000, pilates: 40000,
+    "food truck": 50000, "ice cream": 40000, "juice bar": 45000,
+    salon: 40000, barber: 25000, spa: 80000, "beauty salon": 45000,
+    "real estate": 20000, "property management": 10000, airbnb: 5000,
+    "photography": 8000, "video production": 15000, "podcast": 5000,
+    "clothing brand": 20000, "fashion": 25000, "jewelry": 10000,
+    "landscaping": 15000, "cleaning": 8000, "plumbing": 12000, "electrician": 15000,
+    "dental": 250000, "medical": 300000, pharmacy: 200000, "veterinary": 150000,
+    "daycare": 80000, "tutoring": 5000, "school": 150000,
+    "hotel": 500000, "hostel": 150000, "bed and breakfast": 100000, "b&b": 100000,
+    "car wash": 50000, "auto repair": 60000, "mechanic": 40000,
+    "bookstore": 30000, "florist": 25000, "pet shop": 35000,
+    "laundromat": 80000, "vending": 20000, "franchise": 100000,
+  },
+  "luxury item": {
+    default: 5000,
+    // Furniture
+    couch: 2000, sofa: 2000, "sectional": 3500, "leather sofa": 4000,
+    "dining table": 1500, desk: 800, "standing desk": 1200, "office chair": 800, chair: 500,
+    bed: 1500, mattress: 1200, wardrobe: 1000, bookshelf: 400, dresser: 800,
+    "kitchen": 15000, "kitchen renovation": 15000,
+    // Electronics
+    "macbook": 2500, laptop: 1500, "gaming pc": 2000, "desktop": 1500, computer: 1500,
+    iphone: 1200, phone: 800, ipad: 800, tablet: 600,
+    tv: 1000, "oled tv": 2000, "home theater": 5000, projector: 1500,
+    camera: 2000, "sony camera": 2500, "canon": 2000, "drone": 1500,
+    "ps5": 500, playstation: 500, xbox: 500, "nintendo switch": 350, "gaming console": 500,
+    // Instruments
+    piano: 5000, "grand piano": 15000, "upright piano": 4000, keyboard: 1000,
+    guitar: 1000, "electric guitar": 1500, "acoustic guitar": 800, "bass guitar": 1200,
+    drums: 2000, violin: 2000, saxophone: 3000, trumpet: 1500, cello: 4000,
+    // Sports & Outdoor
+    bicycle: 1500, "road bike": 3000, "mountain bike": 2500, "e-bike": 3500, "electric bike": 3500,
+    kayak: 1000, paddleboard: 800, surfboard: 600, "sup": 800,
+    "home gym": 3000, treadmill: 1500, "peloton": 2000, "rowing machine": 1200,
+    "ski equipment": 1500, skis: 800, snowboard: 600, "golf clubs": 2000,
+    // Luxury
+    watch: 5000, rolex: 10000, omega: 5000, "tag heuer": 3000, "apple watch": 500,
+    jewelry: 3000, ring: 2000, "engagement ring": 5000, necklace: 1500, bracelet: 1000, earrings: 800,
+    handbag: 2000, "louis vuitton": 3000, "hermes": 8000, "chanel": 5000, "gucci": 2500,
+    "designer": 2000, sunglasses: 300,
+    // Vehicles & Toys
+    boat: 30000, sailboat: 40000, yacht: 200000, "jet ski": 12000,
+    "atv": 8000, "quad": 8000, "snowmobile": 10000,
+    "camper": 50000, "rv": 60000, "caravan": 25000, "motorhome": 70000, "van": 40000, "campervan": 45000,
+    // Home
+    "hot tub": 5000, jacuzzi: 6000, sauna: 4000, "swimming pool": 25000, pool: 25000,
+    "solar panels": 10000, "home office": 5000,
+    "art": 3000, painting: 2000, sculpture: 3000,
+    "wine collection": 5000, "wine cellar": 15000,
   },
 };
 
@@ -235,7 +296,8 @@ export async function estimatePrice(
   if (!description.trim()) return getFallbackPrice(description, category);
 
   if (!apiKey) {
-    // Use fallback pricing
+    // Brief delay so user sees the spinner (feels like research)
+    await new Promise(r => setTimeout(r, 600));
     return getFallbackPrice(description, category);
   }
 

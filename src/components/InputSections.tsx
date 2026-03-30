@@ -114,9 +114,11 @@ export function InputSections({
   if (inputs.dreamHome.description || inputs.dreamHome.estimatedPrice) {
     linkableAssets.push({ value: "dreamHome", label: "Dream Home" });
   }
-  if (inputs.holidayHome?.estimatedPrice) {
-    linkableAssets.push({ value: "holidayHome", label: "Holiday Home" });
-  }
+  inputs.additionalProperties.forEach((p, i) => {
+    if (p.estimatedPrice) {
+      linkableAssets.push({ value: `property-${i}`, label: p.description || `Property ${i + 1}` });
+    }
+  });
   inputs.businesses.forEach((b, i) => {
     linkableAssets.push({ value: `business-${i}`, label: b.description || `Business ${i + 1}` });
   });
@@ -681,25 +683,58 @@ export function InputSections({
             />
           </div>
           <Separator />
-          <AIField
-            label="Holiday / Second Home"
-            placeholder='e.g. "Small cottage in the countryside near Porto"'
-            item={
-              inputs.holidayHome ?? {
-                description: "",
-                estimatedPrice: null,
-                isLoading: false,
-              }
-            }
-            onChange={(item) =>
-              updateAIItem(
-                "holidayHome",
-                item.description ? item : (null as unknown as AIPricedItem)
-              )
-            }
-            onEstimate={(desc) => onEstimate(desc, "holiday property")}
-            optional
-          />
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-medium">Additional Real Estate</p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => {
+                  update({
+                    additionalProperties: [
+                      ...inputs.additionalProperties,
+                      { description: "", estimatedPrice: null, isLoading: false },
+                    ],
+                  });
+                }}
+              >
+                <Plus className="h-3 w-3 mr-1" /> Add Property
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">
+              Holiday homes, rental properties, land, etc.
+            </p>
+            {inputs.additionalProperties.map((prop, i) => (
+              <div key={i} className="mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <AIField
+                      label=""
+                      placeholder='e.g. "Cottage near Porto" or "Studio apartment in Berlin"'
+                      item={prop}
+                      onChange={(item) => {
+                        const updated = [...inputs.additionalProperties];
+                        updated[i] = item;
+                        update({ additionalProperties: updated });
+                      }}
+                      onEstimate={(desc) => onEstimate(desc, "residential property")}
+                    />
+                  </div>
+                  <button
+                    onClick={() => {
+                      update({
+                        additionalProperties: inputs.additionalProperties.filter((_, j) => j !== i),
+                      });
+                    }}
+                    className="text-muted-foreground hover:text-destructive transition-colors mt-2"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
