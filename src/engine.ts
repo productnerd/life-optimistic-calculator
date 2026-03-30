@@ -129,7 +129,8 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
   let dreamLifeAchievableAge: number | null = null;
   let dreamEntrepreneurialAge: number | null = null;
   const inheritanceAge = 65; // parents 25 at birth, live to 90
-  let portfolioValue = inputs.currentSavings + inputs.currentInvestments;
+  let cashBalance = inputs.currentSavings; // liquid cash — used for purchases & expenses
+  let portfolioValue = inputs.currentInvestments; // invested funds — never touched for purchases
   let totalLifetimeCost = 0;
 
   for (let y = 0; y < totalYears; y++) {
@@ -197,9 +198,9 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
 
     if (houseBoughtYear < 0) {
       housing = inputs.monthlyRent * 12 * inflationMultiplier;
-      if (portfolioValue >= downPayment && y >= 1) {
+      if (cashBalance >= downPayment && y >= 1) {
         houseBoughtYear = y;
-        portfolioValue -= downPayment;
+        cashBalance -= downPayment;
         housing = annualMortgage;
         milestones.push("🏠 Bought dream home!");
       }
@@ -220,11 +221,11 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       if (holidayHomeBoughtYear < 0) {
         if (
           houseBoughtYear >= 0 &&
-          portfolioValue >= hhDownPayment &&
+          cashBalance >= hhDownPayment &&
           y >= houseBoughtYear + 3
         ) {
           holidayHomeBoughtYear = y;
-          portfolioValue -= hhDownPayment;
+          cashBalance -= hhDownPayment;
           holidayHousing = annualHolidayMortgage;
           milestones.push("🏖️ Bought holiday home!");
         }
@@ -236,15 +237,18 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     }
     housing += holidayHousing;
 
-    // Car (replaced every 15 years)
+    // Car — running costs are expenses, purchase price comes from cash
     let carExpenses = inputs.annualCarCosts * inflationMultiplier;
-    if (y === 0) {
-      carExpenses += carPrice;
+    if (y === 0 && cashBalance >= carPrice) {
+      cashBalance -= carPrice;
       milestones.push("🚗 Bought dream car!");
     }
     if (y > 0 && y % 15 === 0) {
-      carExpenses += carPrice * inflationMultiplier;
-      milestones.push("🚗 Replaced car");
+      const replacementCost = carPrice * inflationMultiplier;
+      if (cashBalance >= replacementCost) {
+        cashBalance -= replacementCost;
+        milestones.push("🚗 Replaced car");
+      }
     }
 
     // Home renovation (every 20 years, 10% of home value)
@@ -288,7 +292,8 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     // Other (big purchases + businesses)
     let otherExpenses = bigPurchaseAnnual * inflationMultiplier;
     if (y === 2 && totalBusinessCost > 0) {
-      otherExpenses += totalBusinessCost;
+      // Business startup cost comes from cash
+      cashBalance -= totalBusinessCost;
       milestones.push("💼 Started business!");
     }
 
@@ -299,15 +304,23 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       hobbyCosts + travelCosts + otherExpenses;
     const totalIncome = salary + investmentIncome;
 
-    // Only invest from salary while working; after retirement, withdraw to cover expenses
+    // Cash & investment flow
     const investmentAmount = isRetired ? 0 : salary * (inputs.investmentPercentage / 100);
-    if (isRetired) {
-      // Withdraw shortfall from portfolio
-      const shortfall = totalExpenses - totalIncome;
-      if (shortfall > 0) portfolioValue -= shortfall;
-    } else {
-      portfolioValue += investmentAmount;
+    const cashFromSalary = salary - investmentAmount; // what goes to cash after investing
+
+    // Add investment amount to portfolio
+    portfolioValue += investmentAmount;
+
+    // Cash pays all expenses
+    cashBalance += cashFromSalary - totalExpenses;
+
+    // If cash is negative, withdraw from portfolio to cover (last resort)
+    if (cashBalance < 0 && portfolioValue > 0) {
+      const withdrawal = Math.min(-cashBalance, portfolioValue);
+      portfolioValue -= withdrawal;
+      cashBalance += withdrawal;
     }
+
     // Apply returns only on positive portfolio (can't earn returns on debt)
     if (portfolioValue > 0) {
       portfolioValue *= 1 + blendedReturn;
@@ -357,14 +370,14 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     // Family gifts (every X years while parents alive, until age 65)
     if (inputs.familyGiftAmount > 0 && inputs.familyGiftInterval > 0 && age < inheritanceAge) {
       if (y > 0 && y % inputs.familyGiftInterval === 0) {
-        portfolioValue += inputs.familyGiftAmount;
+        cashBalance += inputs.familyGiftAmount;
         milestones.push("🎁 Family gift received");
       }
     }
 
     // Inheritance lump sum
     if (inputs.expectedInheritance > 0 && age === inheritanceAge) {
-      portfolioValue += inputs.expectedInheritance;
+      cashBalance += inputs.expectedInheritance;
       milestones.push("💰 Received inheritance");
     }
 
@@ -411,7 +424,7 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       totalExpenses: Math.round(totalExpenses),
       amountInvested: Math.round(investmentAmount),
       portfolioValue: Math.round(portfolioValue),
-      netWorth: Math.round(portfolioValue + homeEquity + holidayHomeEquity + carValue),
+      netWorth: Math.round(cashBalance + portfolioValue + homeEquity + holidayHomeEquity + carValue),
       isWorking,
       isMiniRetirement,
       milestones,

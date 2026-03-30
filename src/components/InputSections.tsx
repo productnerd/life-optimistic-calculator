@@ -158,20 +158,20 @@ export function InputSections({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <NumberField
-              label="Current Wealth"
+              label="Cash in the Bank"
               value={inputs.currentSavings}
               onChange={(v) => update({ currentSavings: v })}
               min={0}
               prefix="€"
-              description="Cash, savings accounts"
+              description="Liquid savings — used for purchases"
             />
             <NumberField
-              label="Current Investments"
+              label="Invested Money"
               value={inputs.currentInvestments}
               onChange={(v) => update({ currentInvestments: v })}
               min={0}
               prefix="€"
-              description="Stocks, funds, crypto, etc."
+              description="Stocks, funds, crypto — never touched for purchases"
             />
           </div>
           <NumberField
