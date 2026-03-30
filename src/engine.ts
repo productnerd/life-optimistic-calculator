@@ -182,12 +182,19 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     // No salary during mini-retirement or after retirement
     // Side income stops during mini-retirement only if flag is set
     const sideIncomeMultiplier = inputs.miniRetirementStopSideIncome ? workingFraction : 1;
-    const grossSalary = baseSalary * workingFraction + additionalIncomeTotal * sideIncomeMultiplier + partnerIncome;
+    const grossSalaryOnly = baseSalary * workingFraction;
+    const grossSideIncome = additionalIncomeTotal * sideIncomeMultiplier;
+    const grossTotal = grossSalaryOnly + grossSideIncome + partnerIncome;
 
     // Taxes and pension (only on earned income, not investment income)
-    const taxes = grossSalary * (inputs.effectiveTaxRate / 100);
-    const pensionContribution = (baseSalary * workingFraction + partnerIncome) * (inputs.pensionContributionPercent / 100);
-    const salary = grossSalary - taxes - pensionContribution;
+    const taxes = grossTotal * (inputs.effectiveTaxRate / 100);
+    const pensionContribution = (grossSalaryOnly + partnerIncome) * (inputs.pensionContributionPercent / 100);
+    // Distribute tax proportionally across income streams
+    const taxRate = grossTotal > 0 ? taxes / grossTotal : 0;
+    const netSalary = grossSalaryOnly * (1 - taxRate) - pensionContribution;
+    const netSideIncome = grossSideIncome * (1 - taxRate);
+    const netPartnerIncome = partnerIncome * (1 - taxRate);
+    const salary = netSalary + netSideIncome + netPartnerIncome;
 
     const investmentIncome = portfolioValue * blendedReturn;
 
@@ -406,7 +413,9 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     snapshots.push({
       year: y + 1,
       age,
-      salary: Math.round(salary),
+      salary: Math.round(netSalary),
+      sideIncome: Math.round(netSideIncome),
+      partnerIncome: Math.round(netPartnerIncome),
       investmentIncome: Math.round(investmentIncome),
       totalIncome: Math.round(totalIncome),
       taxes: Math.round(taxes),

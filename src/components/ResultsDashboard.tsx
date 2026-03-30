@@ -68,6 +68,8 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
   const incomeExpenseData = yearlySnapshots.map((s) => ({
     age: s.age,
     "Net Salary": s.salary,
+    "Side Income": s.sideIncome,
+    "Partner Income": s.partnerIncome,
     "Investment Income": s.investmentIncome,
     Taxes: -s.taxes,
     Pension: -s.pensionContribution,
@@ -369,20 +371,20 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
           <CardTitle className="text-lg" style={{ fontFamily: "'Fraunces', serif" }}>Net Worth Journey</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[350px]">
+          <div className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={netWorthData}>
+              <LineChart data={netWorthData} margin={{ bottom: 30 }}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis
                   dataKey="age"
-                  label={{ value: "Age", position: "bottom", offset: -5 }}
+                  label={{ value: "Age", position: "bottom", offset: 0 }}
                 />
                 <YAxis
                   tickFormatter={formatCurrency}
                   width={70}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend />
+                <Legend wrapperStyle={{ paddingTop: 16 }} />
                 {dreamLifeAchievableAge && (
                   <ReferenceLine
                     x={dreamLifeAchievableAge}
@@ -451,17 +453,17 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[400px]">
+          <div className="h-[450px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={incomeExpenseData}>
+              <AreaChart data={incomeExpenseData} margin={{ bottom: 30 }}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis
                   dataKey="age"
-                  label={{ value: "Age", position: "bottom", offset: -5 }}
+                  label={{ value: "Age", position: "bottom", offset: 0 }}
                 />
                 <YAxis tickFormatter={formatCurrency} width={70} />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend />
+                <Legend wrapperStyle={{ paddingTop: 16 }} />
                 <ReferenceLine y={0} stroke="#78716c" />
                 {/* Income (positive) */}
                 <Area
@@ -470,6 +472,22 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
                   stackId="income"
                   fill="#8B9E6B"
                   stroke="#8B9E6B"
+                  fillOpacity={0.6}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="Side Income"
+                  stackId="income"
+                  fill="#e59500"
+                  stroke="#e59500"
+                  fillOpacity={0.6}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="Partner Income"
+                  stackId="income"
+                  fill="#10b981"
+                  stroke="#10b981"
                   fillOpacity={0.6}
                 />
                 <Area

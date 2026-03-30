@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, X } from "lucide-react";
 import type { DreamInputs, AIPricedItem } from "@/types";
+import { createAIPricedItem } from "@/types";
 import { estimateTaxes } from "@/ai";
 
 interface InputSectionsProps {
@@ -444,7 +445,7 @@ export function InputSections({
                           update({
                             businesses: [
                               ...inputs.businesses,
-                              { description: "", estimatedPrice: null, isLoading: false },
+                              createAIPricedItem(),
                             ],
                           });
                           setTimeout(() => businessesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
@@ -694,7 +695,7 @@ export function InputSections({
                   update({
                     additionalProperties: [
                       ...inputs.additionalProperties,
-                      { description: "", estimatedPrice: null, isLoading: false },
+                      createAIPricedItem(),
                     ],
                   });
                 }}
@@ -706,7 +707,7 @@ export function InputSections({
               Holiday homes, rental properties, land, etc.
             </p>
             {inputs.additionalProperties.map((prop, i) => (
-              <div key={i} className="mb-3">
+              <div key={prop.id} className="mb-3">
                 <div className="flex items-center gap-2">
                   <div className="flex-1">
                     <AIField
@@ -897,7 +898,7 @@ export function InputSections({
                   update({
                     businesses: [
                       ...inputs.businesses,
-                      { description: "", estimatedPrice: null, isLoading: false },
+                      createAIPricedItem(),
                     ],
                   })
                 }
@@ -907,7 +908,7 @@ export function InputSections({
               </Button>
             </div>
             {inputs.businesses.map((biz, i) => (
-              <div key={i} className="flex items-center gap-2">
+              <div key={biz.id} className="flex items-center gap-2">
                 <div className="flex-1">
                   <AIField
                     label=""
@@ -988,7 +989,7 @@ export function InputSections({
                   update({
                     bigPurchases: [
                       ...inputs.bigPurchases,
-                      { description: "", estimatedPrice: null, isLoading: false },
+                      createAIPricedItem(),
                     ],
                   })
                 }
@@ -998,7 +999,7 @@ export function InputSections({
               </Button>
             </div>
             {inputs.bigPurchases.map((purchase, i) => (
-              <div key={i} className="flex items-center gap-2">
+              <div key={purchase.id} className="flex items-center gap-2">
                 <div className="flex-1">
                   <AIField
                     label=""

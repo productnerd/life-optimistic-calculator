@@ -94,6 +94,17 @@ function App() {
           parsed.additionalProperties = parsed.holidayHome ? [parsed.holidayHome] : [];
           delete parsed.holidayHome;
         }
+        // Ensure all AIPricedItems have an id
+        const ensureId = (item: any) => {
+          if (item && !item.id) item.id = `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+          return item;
+        };
+        if (parsed.dreamHome) ensureId(parsed.dreamHome);
+        if (parsed.dreamCar) ensureId(parsed.dreamCar);
+        if (parsed.bigPurchases) parsed.bigPurchases = parsed.bigPurchases.map(ensureId);
+        if (parsed.businesses) parsed.businesses = parsed.businesses.map(ensureId);
+        if (parsed.hobbies) parsed.hobbies = parsed.hobbies.map(ensureId);
+        if (parsed.additionalProperties) parsed.additionalProperties = parsed.additionalProperties.map(ensureId);
         return { ...createDefaultInputs(), ...parsed };
       }
     } catch {}

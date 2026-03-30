@@ -84,16 +84,24 @@ export interface DreamInputs {
 }
 
 export interface AIPricedItem {
+  id: string; // unique ID for stable React keys
   description: string;
   estimatedPrice: number | null;
   isLoading: boolean;
+}
+
+let _nextId = 0;
+export function createAIPricedItem(description = "", estimatedPrice: number | null = null): AIPricedItem {
+  return { id: `ai-${Date.now()}-${_nextId++}`, description, estimatedPrice, isLoading: false };
 }
 
 export interface YearlySnapshot {
   year: number;
   age: number;
   // Income
-  salary: number;
+  salary: number; // net salary only (after tax/pension, no side income)
+  sideIncome: number; // additional income streams
+  partnerIncome: number; // partner salary (net)
   investmentIncome: number;
   totalIncome: number;
   // Expenses
@@ -150,13 +158,13 @@ export function createDefaultInputs(): DreamInputs {
       { name: "Cash / Savings", percentage: 10, expectedReturn: 1.5 },
     ],
     inflationRate: 2.5,
-    dreamHome: { description: "", estimatedPrice: 350000, isLoading: false },
+    dreamHome: createAIPricedItem("", 350000),
     monthlyRent: 900,
     mortgageRate: 3.5,
     mortgageTerm: 30,
     downPaymentPercent: 15,
     additionalProperties: [],
-    dreamCar: { description: "", estimatedPrice: 20000, isLoading: false },
+    dreamCar: createAIPricedItem("", 20000),
     annualCarCosts: 2500,
     numberOfKids: 0,
     kidsAges: [],
