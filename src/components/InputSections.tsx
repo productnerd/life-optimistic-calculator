@@ -159,27 +159,34 @@ export function InputSections({
           {/* Country & Tax */}
           <div>
             <p className="text-sm font-medium mb-2">Country</p>
-            <select
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            <Input
+              type="text"
+              placeholder="e.g. Netherlands, USA, Germany..."
               value={inputs.country}
               onChange={(e) => {
                 const country = e.target.value;
                 const taxRates: Record<string, number> = {
-                  "Netherlands": 37, "Germany": 35, "France": 30, "UK": 27,
-                  "Spain": 24, "Italy": 33, "Portugal": 23, "Belgium": 40,
-                  "Sweden": 32, "Denmark": 36, "Norway": 33, "Finland": 31,
-                  "Ireland": 27, "Austria": 34, "Switzerland": 22, "USA": 24,
-                  "Canada": 26, "Australia": 24, "Other": 30,
+                  "netherlands": 37, "germany": 35, "france": 30, "uk": 27,
+                  "united kingdom": 27, "spain": 24, "italy": 33, "portugal": 23, "belgium": 40,
+                  "sweden": 32, "denmark": 36, "norway": 33, "finland": 31,
+                  "ireland": 27, "austria": 34, "switzerland": 22, "usa": 24,
+                  "united states": 24, "canada": 26, "australia": 24, "japan": 30,
+                  "south korea": 25, "brazil": 27, "mexico": 25, "india": 26,
+                  "singapore": 15, "hong kong": 15, "new zealand": 28, "greece": 29,
+                  "poland": 25, "czech republic": 23, "romania": 16, "hungary": 15,
+                  "croatia": 24, "bulgaria": 10, "cyprus": 17, "malta": 25,
+                  "luxembourg": 38, "iceland": 31, "estonia": 20, "latvia": 23,
+                  "lithuania": 20, "slovenia": 27, "slovakia": 21,
                 };
-                update({ country, effectiveTaxRate: taxRates[country] ?? 30 });
+                const matchedRate = taxRates[country.toLowerCase().trim()];
+                if (matchedRate !== undefined) {
+                  update({ country, effectiveTaxRate: matchedRate });
+                } else {
+                  update({ country });
+                }
               }}
-            >
-              {["Netherlands", "Germany", "France", "UK", "Spain", "Italy", "Portugal", "Belgium",
-                "Sweden", "Denmark", "Norway", "Finland", "Ireland", "Austria", "Switzerland",
-                "USA", "Canada", "Australia", "Other"].map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+            />
+            <p className="text-xs text-muted-foreground mt-1">Tax rate auto-adjusts when a known country is entered</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <SliderField

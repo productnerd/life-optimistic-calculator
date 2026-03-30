@@ -112,14 +112,34 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
             {expandedCard === "dream" && dreamLifeAchievableAge && (() => {
               const snap = yearlySnapshots.find(s => s.age === dreamLifeAchievableAge);
               if (!snap) return null;
+              // Collect all milestones achieved up to dream life age
+              const achieved = yearlySnapshots
+                .filter(s => s.age <= dreamLifeAchievableAge)
+                .flatMap(s => s.milestones.filter(m =>
+                  m.includes("Bought") || m.includes("Started") || m.includes("born") || m.includes("Dream life") || m.includes("Mortgage paid")
+                ));
+              // Deduplicate
+              const uniqueAchieved = [...new Set(achieved)];
               return (
-                <div className="card-breakdown mt-3 pt-3 border-t border-border/50 space-y-1.5 text-xs text-muted-foreground">
-                  <p className="text-primary/70 font-medium mb-2">At age {dreamLifeAchievableAge}:</p>
-                  <div className="flex justify-between"><span>Salary</span><span className="font-mono text-foreground">{formatCurrency(snap.salary)}</span></div>
-                  <div className="flex justify-between"><span>Investment income</span><span className="font-mono text-foreground">{formatCurrency(snap.investmentIncome)}</span></div>
-                  <div className="flex justify-between font-medium text-primary/80 pt-1 border-t border-border/30"><span>Total income</span><span className="font-mono">{formatCurrency(snap.totalIncome)}</span></div>
-                  <div className="flex justify-between mt-1"><span>Total expenses</span><span className="font-mono text-foreground">{formatCurrency(snap.totalExpenses)}</span></div>
-                  <div className="flex justify-between"><span>Net worth</span><span className="font-mono text-foreground">{formatCurrency(snap.netWorth)}</span></div>
+                <div className="card-breakdown mt-3 pt-3 border-t border-border/50 space-y-2 text-xs text-muted-foreground">
+                  <p className="text-primary/70 font-medium mb-2">By age {dreamLifeAchievableAge}, you'll have:</p>
+                  {uniqueAchieved.map((m, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-green-500 shrink-0">✓</span>
+                      <span className="text-foreground">{m.replace(/^[^\w]*/, '')}</span>
+                    </div>
+                  ))}
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-500 shrink-0">✓</span>
+                    <span className="text-foreground">Income covers all expenses</span>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-border/30 space-y-1.5">
+                    <div className="flex justify-between"><span>Net salary</span><span className="font-mono text-foreground">{formatCurrency(snap.salary)}</span></div>
+                    <div className="flex justify-between"><span>Investment income</span><span className="font-mono text-foreground">{formatCurrency(snap.investmentIncome)}</span></div>
+                    <div className="flex justify-between font-medium text-primary/80 pt-1 border-t border-border/30"><span>Total income</span><span className="font-mono">{formatCurrency(snap.totalIncome)}</span></div>
+                    <div className="flex justify-between"><span>Total expenses</span><span className="font-mono text-foreground">{formatCurrency(snap.totalExpenses)}</span></div>
+                    <div className="flex justify-between"><span>Net worth</span><span className="font-mono text-foreground">{formatCurrency(snap.netWorth)}</span></div>
+                  </div>
                 </div>
               );
             })()}

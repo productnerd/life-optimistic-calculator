@@ -14,6 +14,14 @@ interface NumberFieldProps {
   description?: string;
 }
 
+function formatWithCommas(n: number): string {
+  return n.toLocaleString("en-US");
+}
+
+function parseFormatted(s: string): string {
+  return s.replace(/,/g, "");
+}
+
 export function NumberField({
   label,
   value,
@@ -31,28 +39,31 @@ export function NumberField({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     setDisplay(raw);
-    const num = Number(raw);
-    if (raw !== "" && !isNaN(num)) {
+    const cleaned = parseFormatted(raw);
+    const num = Number(cleaned);
+    if (cleaned !== "" && !isNaN(num)) {
       onChange(num);
     }
   };
 
   const handleBlur = () => {
     setFocused(false);
-    if (display === "" || isNaN(Number(display))) {
+    const cleaned = parseFormatted(display);
+    if (cleaned === "" || isNaN(Number(cleaned))) {
       setDisplay(String(min ?? 0));
       onChange(min ?? 0);
     } else {
-      setDisplay(String(Number(display)));
+      setDisplay(String(Number(cleaned)));
     }
   };
 
   const handleFocus = () => {
     setFocused(true);
+    setDisplay(String(value));
   };
 
-  // Sync external value changes when not focused
-  const shown = focused ? display : String(value);
+  // When not focused, show formatted value with commas
+  const shown = focused ? display : formatWithCommas(value);
 
   return (
     <div className="space-y-2">
@@ -67,7 +78,8 @@ export function NumberField({
           </span>
         )}
         <Input
-          type="number"
+          type="text"
+          inputMode="numeric"
           value={shown}
           onChange={handleChange}
           onFocus={handleFocus}

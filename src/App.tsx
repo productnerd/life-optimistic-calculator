@@ -119,19 +119,7 @@ function App() {
       {/* Header */}
       <header className="border-b border-border/50 glass-card sticky top-0 z-50">
         <div className="w-full px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center">
-              <span className="text-xl">✨</span>
-            </div>
-            <div>
-              <h1 className="text-lg font-bold tracking-tight" style={{ fontFamily: "'Fraunces', serif" }}>
-                Life Optimistic Calculator
-              </h1>
-              <p className="text-xs text-muted-foreground italic" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                your dream life costs less than you think
-              </p>
-            </div>
-          </div>
+          <div />
           <ApiKeyDialog apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />
         </div>
       </header>
@@ -142,17 +130,16 @@ function App() {
           className="text-4xl md:text-5xl font-black tracking-tight text-foreground"
           style={{ fontFamily: "'Fraunces', serif" }}
         >
-          How much does your{" "}
+          You don't need to slave around to get your{" "}
           <span className="text-primary">
             dream life
-          </span>{" "}
-          actually cost?
+          </span>.
         </h2>
         <p
           className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto italic"
           style={{ fontFamily: "'DM Sans', sans-serif" }}
         >
-          Most people overestimate what they need.
+          Your dream life costs less than you think.
         </p>
       </section>
 
