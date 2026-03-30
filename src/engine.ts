@@ -11,12 +11,19 @@ function childYearlyCost(childAge: number): number {
 }
 
 // Returns a map of year -> fraction of year spent on mini-retirement (0 to 1)
+// and a set of years where a new mini-retirement starts
+interface MiniRetirementData {
+  yearFractions: Map<number, number>;
+  startYears: Set<number>;
+}
+
 function getMiniRetirementYears(
   inputs: DreamInputs,
   workingYears: number
-): Map<number, number> {
+): MiniRetirementData {
   const yearFractions = new Map<number, number>();
-  if (inputs.miniRetirements <= 0 || inputs.miniRetirementDuration <= 0) return yearFractions;
+  const startYears = new Set<number>();
+  if (inputs.miniRetirements <= 0 || inputs.miniRetirementDuration <= 0) return { yearFractions, startYears };
 
   const durationMonths = inputs.miniRetirementDuration;
   const spacing = Math.floor(workingYears / (inputs.miniRetirements + 1));
@@ -24,6 +31,8 @@ function getMiniRetirementYears(
   for (let i = 0; i < inputs.miniRetirements; i++) {
     const startYear = spacing * (i + 1);
     if (startYear >= workingYears) break;
+
+    startYears.add(startYear);
 
     let remainingMonths = durationMonths;
     let currentYear = startYear;
@@ -35,7 +44,7 @@ function getMiniRetirementYears(
       currentYear++;
     }
   }
-  return yearFractions;
+  return { yearFractions, startYears };
 }
 
 // Count active kids (age 0-21) for a given simulation year
@@ -104,7 +113,7 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
   );
   const bigPurchaseAnnual = totalBigPurchases / Math.min(10, workingYearsCount);
 
-  const miniRetYears = getMiniRetirementYears(inputs, workingYearsCount);
+  const miniRetData = getMiniRetirementYears(inputs, workingYearsCount);
 
   let houseBoughtYear = -1;
   let holidayHomeBoughtYear = -1;
@@ -118,7 +127,7 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     const age = inputs.currentAge + y;
     const inflationMultiplier = Math.pow(1 + inputs.inflationRate / 100, y);
     const isRetired = age >= inputs.targetRetireAge;
-    const miniRetFraction = isRetired ? 0 : (miniRetYears.get(y) ?? 0);
+    const miniRetFraction = isRetired ? 0 : (miniRetData.yearFractions.get(y) ?? 0);
     const isMiniRetirement = miniRetFraction > 0;
     const isWorking = !isRetired && miniRetFraction < 1;
     const workingFraction = isRetired ? 0 : 1 - miniRetFraction;
@@ -339,12 +348,8 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       milestones.push("🚀 Entrepreneurial dream achieved!");
     }
 
-    if (isMiniRetirement && miniRetFraction >= 0.5) {
-      // Only show milestone on the first year of each mini-retirement
-      const prevYearMiniRet = miniRetYears.get(y - 1) ?? 0;
-      if (prevYearMiniRet === 0) {
-        milestones.push(`🌴 Mini-retirement (${inputs.miniRetirementDuration}mo)`);
-      }
+    if (miniRetData.startYears.has(y)) {
+      milestones.push(`🌴 Mini-retirement (${inputs.miniRetirementDuration}mo)`);
     }
 
     if (age === inputs.targetRetireAge) {
