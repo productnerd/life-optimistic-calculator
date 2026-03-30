@@ -729,7 +729,7 @@ export function InputSections({
                         additionalProperties: inputs.additionalProperties.filter((_, j) => j !== i),
                       });
                     }}
-                    className="text-muted-foreground hover:text-destructive transition-colors mt-2"
+                    className="text-muted-foreground hover:text-destructive transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -926,7 +926,7 @@ export function InputSections({
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive mt-2"
+                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
                   onMouseDown={(e) => {
                     e.preventDefault();
                     const updated = inputs.businesses.filter(
@@ -1018,7 +1018,7 @@ export function InputSections({
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive mt-2"
+                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
                   onMouseDown={(e) => {
                     e.preventDefault();
                     const updated = inputs.bigPurchases.filter(
@@ -1083,7 +1083,7 @@ export function InputSections({
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive mt-2"
+                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
                   onMouseDown={(e) => {
                     e.preventDefault();
                     const updated = inputs.hobbies.filter(

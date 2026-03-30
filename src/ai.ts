@@ -443,8 +443,8 @@ export async function estimatePrice(
           {
             role: "user",
             content: category === "hobby"
-              ? `You are a cost estimation assistant. Estimate the ANNUAL cost in EUR for someone doing "${description}" as a hobby/activity in Europe. Include membership fees, equipment maintenance, lessons, club fees, consumables — everything needed for a year of regular participation. Respond with ONLY a JSON object: {"price": <number>}. No other text.`
-              : `You are a price estimation assistant. Estimate the current market price in EUR for: "${description}" (category: ${category}). Consider the European market. Respond with ONLY a JSON object: {"price": <number>}. No other text.`,
+              ? `Estimate the TOTAL ANNUAL cost in EUR for someone actively doing "${description}" as a regular hobby in Europe. This person does it EVERY WEEK or at least multiple times per month throughout the year. Include ALL yearly costs: club/gym membership, equipment purchase and replacement, lessons/coaching, travel to locations, gear maintenance, insurance, competition fees, consumables, permits/licenses. Add it ALL up for a full year. Be realistic — hobbies are expensive! For example: golf costs ~€3000/yr, sailing ~€4000/yr, horse riding ~€3500/yr, skydiving ~€3000/yr. Respond with ONLY: {"price": <number>}`
+              : `You are a price estimation assistant. Estimate the current market price in EUR for: "${description}" (category: ${category}). Consider the European market. If this is a vintage, classic, or collector's item, price it at current collector market value, NOT original retail price. Respond with ONLY a JSON object: {"price": <number>}. No other text.`,
           },
         ],
       }),

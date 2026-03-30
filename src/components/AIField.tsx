@@ -51,15 +51,17 @@ export function AIField({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <Label className="text-sm font-medium">{label}</Label>
-        {optional && (
-          <Badge variant="secondary" className="text-xs">
-            Optional
-          </Badge>
-        )}
-        <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-      </div>
+      {(label || optional) && (
+        <div className="flex items-center gap-2">
+          <Label className="text-sm font-medium">{label}</Label>
+          {optional && (
+            <Badge variant="secondary" className="text-xs">
+              Optional
+            </Badge>
+          )}
+          <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+        </div>
+      )}
       <div className="relative">
         <Input
           placeholder={placeholder}
