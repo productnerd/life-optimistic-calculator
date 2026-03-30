@@ -305,15 +305,35 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     }
 
     // Net worth = portfolio + home equity (tracks actual equity built up)
+    // Properties appreciate at inflation rate
     let homeEquity = 0;
     if (houseBoughtYear >= 0) {
       const yearsOwned = y - houseBoughtYear;
+      const appreciatedValue = homePrice * Math.pow(1 + inputs.inflationRate / 100, yearsOwned);
       if (yearsOwned >= inputs.mortgageTerm) {
-        homeEquity = homePrice;
+        homeEquity = appreciatedValue;
       } else {
-        // Down payment + approximate principal paid (simplified linear)
+        // Appreciated value minus remaining mortgage balance (simplified linear paydown)
         const principalPaid = (loanAmount / inputs.mortgageTerm) * yearsOwned;
-        homeEquity = downPayment + principalPaid;
+        const remainingMortgage = loanAmount - principalPaid;
+        homeEquity = appreciatedValue - remainingMortgage;
+      }
+    }
+
+    // Holiday home equity
+    let holidayHomeEquity = 0;
+    if (inputs.holidayHome?.estimatedPrice && holidayHomeBoughtYear >= 0) {
+      const hhPrice = inputs.holidayHome.estimatedPrice;
+      const hhYearsOwned = y - holidayHomeBoughtYear;
+      const hhAppreciatedValue = hhPrice * Math.pow(1 + inputs.inflationRate / 100, hhYearsOwned);
+      const hhDown = hhPrice * (inputs.downPaymentPercent / 100);
+      const hhLoan = hhPrice - hhDown;
+      if (hhYearsOwned >= inputs.mortgageTerm) {
+        holidayHomeEquity = hhAppreciatedValue;
+      } else {
+        const hhPrincipalPaid = (hhLoan / inputs.mortgageTerm) * hhYearsOwned;
+        const hhRemainingMortgage = hhLoan - hhPrincipalPaid;
+        holidayHomeEquity = hhAppreciatedValue - hhRemainingMortgage;
       }
     }
 
@@ -374,7 +394,7 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
       totalExpenses: Math.round(totalExpenses),
       amountInvested: Math.round(investmentAmount),
       portfolioValue: Math.round(portfolioValue),
-      netWorth: Math.round(portfolioValue + homeEquity),
+      netWorth: Math.round(portfolioValue + homeEquity + holidayHomeEquity),
       isWorking,
       isMiniRetirement,
       milestones,
