@@ -213,7 +213,9 @@ export function runSimulation(inputs: DreamInputs): SimulationResult {
     } else if (y - houseBoughtYear < inputs.mortgageTerm) {
       housing = annualMortgage;
     } else {
-      milestones.push("🎉 Mortgage paid off!");
+      if (y - houseBoughtYear === inputs.mortgageTerm) {
+        milestones.push("🎉 Mortgage paid off!");
+      }
       housing = 2000 * inflationMultiplier;
     }
 
