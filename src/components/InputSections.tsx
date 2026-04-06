@@ -33,10 +33,9 @@ interface InputSectionsProps {
   inputs: DreamInputs;
   onChange: (inputs: DreamInputs) => void;
   onEstimate: (description: string, category: string) => Promise<number>;
-  apiKey: string | null;
 }
 
-function CountryTaxField({ inputs, update, apiKey }: { inputs: DreamInputs; update: (partial: Partial<DreamInputs>) => void; apiKey: string | null }) {
+function CountryTaxField({ inputs, update }: { inputs: DreamInputs; update: (partial: Partial<DreamInputs>) => void }) {
   const [countryInput, setCountryInput] = useState(inputs.country);
   const [isLoading, setIsLoading] = useState(false);
   const [estimated, setEstimated] = useState(!!inputs.country);
@@ -45,7 +44,7 @@ function CountryTaxField({ inputs, update, apiKey }: { inputs: DreamInputs; upda
     if (!countryInput.trim()) return;
     setIsLoading(true);
     try {
-      const result = await estimateTaxes(countryInput, inputs.annualSalary, apiKey);
+      const result = await estimateTaxes(countryInput, inputs.annualSalary, null);
       update({
         country: countryInput,
         effectiveTaxRate: result.effectiveTaxRate,
@@ -102,7 +101,6 @@ export function InputSections({
   inputs,
   onChange,
   onEstimate,
-  apiKey,
 }: InputSectionsProps) {
   const update = (partial: Partial<DreamInputs>) =>
     onChange({ ...inputs, ...partial });
@@ -200,7 +198,7 @@ export function InputSections({
           />
           <Separator />
           {/* Country & Tax */}
-          <CountryTaxField inputs={inputs} update={update} apiKey={apiKey} />
+          <CountryTaxField inputs={inputs} update={update} />
           <div className="grid grid-cols-2 gap-4">
             <SliderField
               label="Effective Tax Rate"

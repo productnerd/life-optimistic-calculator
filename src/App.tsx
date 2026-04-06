@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { InputSections } from "@/components/InputSections";
 import { ResultsDashboard } from "@/components/ResultsDashboard";
-import { ApiKeyDialog } from "@/components/ApiKeyDialog";
 import { createDefaultInputs } from "@/types";
 import type { DreamInputs } from "@/types";
 import { runSimulation } from "@/engine";
@@ -110,9 +109,6 @@ function App() {
     } catch {}
     return createDefaultInputs();
   });
-  const [apiKey, setApiKey] = useState<string | null>(() =>
-    localStorage.getItem("claude-api-key")
-  );
   const [expanded, setExpanded] = useState(false);
 
   const updateInputs = useCallback((newInputs: DreamInputs) => {
@@ -120,33 +116,17 @@ function App() {
     localStorage.setItem("life-calc-inputs", JSON.stringify(newInputs));
   }, []);
 
-  const handleApiKeyChange = useCallback((key: string | null) => {
-    setApiKey(key);
-    if (key) {
-      localStorage.setItem("claude-api-key", key);
-    } else {
-      localStorage.removeItem("claude-api-key");
-    }
-  }, []);
-
   const handleEstimate = useCallback(
     async (description: string, category: string): Promise<number> => {
-      return estimatePrice(description, category, apiKey);
+      return estimatePrice(description, category, null);
     },
-    [apiKey]
+    []
   );
 
   const result = useMemo(() => runSimulation(inputs), [inputs]);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border/50 glass-card sticky top-0 z-50">
-        <div className="w-full px-6 py-4 flex items-center justify-between">
-          <div />
-          <ApiKeyDialog apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />
-        </div>
-      </header>
 
       {/* Hero */}
       <section className="w-full px-6 py-12 text-center">
@@ -175,7 +155,6 @@ function App() {
               inputs={inputs}
               onChange={updateInputs}
               onEstimate={handleEstimate}
-              apiKey={apiKey}
             />
           </div>
 
