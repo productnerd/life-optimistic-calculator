@@ -347,7 +347,7 @@ export interface TaxEstimate {
 export async function estimateTaxes(
   country: string,
   annualIncome: number,
-  apiKey: string | null
+  _apiKey: string | null
 ): Promise<TaxEstimate> {
   const countryLower = country.toLowerCase().trim();
 
