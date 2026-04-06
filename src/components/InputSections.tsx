@@ -177,33 +177,7 @@ export function InputSections({
               description="Stocks, funds, crypto — never touched for purchases"
             />
           </div>
-          <NumberField
-            label="Expected Inheritance"
-            value={inputs.expectedInheritance}
-            onChange={(v) => update({ expectedInheritance: v })}
-            min={0}
-            prefix="€"
-            description="Lump sum at age 65 (parents 25 at your birth, live to 90)"
-          />
-          <div className="grid grid-cols-2 gap-4">
-            <NumberField
-              label="Family Gift Amount"
-              value={inputs.familyGiftAmount}
-              onChange={(v) => update({ familyGiftAmount: v })}
-              min={0}
-              prefix="€"
-              description="Gift received periodically"
-            />
-            <NumberField
-              label="Every X Years"
-              value={inputs.familyGiftInterval}
-              onChange={(v) => update({ familyGiftInterval: v })}
-              min={1}
-              max={20}
-              suffix=" yrs"
-              description="How often gifts arrive"
-            />
-          </div>
+          {/* Inheritance & Family Gifts — temporarily hidden */}
           <Separator />
           <SliderField
             label="Annual Salary"

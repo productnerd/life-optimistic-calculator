@@ -152,7 +152,7 @@ function App() {
       <section className="w-full px-6 py-12 text-center">
         <h2
           className="text-4xl md:text-5xl font-black tracking-tight text-foreground"
-          style={{ fontFamily: "'Fraunces', serif" }}
+          style={{ fontFamily: "'Instrument Serif', serif" }}
         >
           Your{" "}
           <span className="text-primary">

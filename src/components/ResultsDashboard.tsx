@@ -114,7 +114,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
               </div>
               <ChevronDown className={`h-4 w-4 text-primary/40 transition-transform duration-300 ${expandedCard === "dream" ? "rotate-180" : ""}`} />
             </div>
-            <p className="text-4xl font-bold text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
+            <p className="text-4xl font-bold text-foreground" style={{ fontFamily: "'Instrument Serif', serif" }}>
               {dreamLifeAchievableAge ?? "—"}
             </p>
             <p className="text-sm text-primary/80 mt-1" >
@@ -177,7 +177,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
                 </div>
                 <ChevronDown className={`h-4 w-4 text-primary/30 transition-transform duration-300 ${expandedCard === "entrepreneur" ? "rotate-180" : ""}`} />
               </div>
-              <p className="text-4xl font-bold text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
+              <p className="text-4xl font-bold text-foreground" style={{ fontFamily: "'Instrument Serif', serif" }}>
                 {dreamEntrepreneurialAge}
               </p>
               <p className="text-sm text-primary/70 mt-1" >
@@ -366,7 +366,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
       {/* Net Worth Chart */}
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="text-lg" style={{ fontFamily: "'Fraunces', serif" }}>Net Worth Journey</CardTitle>
+          <CardTitle className="text-lg" style={{ fontFamily: "'Instrument Serif', serif" }}>Net Worth Journey</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[400px]">
@@ -463,7 +463,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
       {/* Income vs Expenses Chart */}
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="text-lg" style={{ fontFamily: "'Fraunces', serif" }}>
+          <CardTitle className="text-lg" style={{ fontFamily: "'Instrument Serif', serif" }}>
             Income vs Expenses (Year by Year)
           </CardTitle>
         </CardHeader>
@@ -587,7 +587,7 @@ export function ResultsDashboard({ result, inputs }: ResultsDashboardProps) {
       {/* Milestones Timeline Chart */}
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="text-lg" style={{ fontFamily: "'Fraunces', serif" }}>Life Milestones</CardTitle>
+          <CardTitle className="text-lg" style={{ fontFamily: "'Instrument Serif', serif" }}>Life Milestones</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[300px]">

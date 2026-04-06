@@ -361,48 +361,25 @@ export async function estimateTaxes(
     };
   }
 
-  // If we have an API key and unknown country, ask AI
-  if (apiKey && country.trim()) {
-    try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 150,
-          messages: [
-            {
-              role: "user",
-              content: `For someone earning €${annualIncome.toLocaleString()} per year in "${country}", estimate:
+  // Ask AI via Supabase proxy for unknown countries
+  if (country.trim()) {
+    const prompt = `For someone earning €${annualIncome.toLocaleString()} per year in "${country}", estimate:
 1. Their effective income tax rate (as a percentage, accounting for progressive brackets and standard deductions)
 2. The mandatory employee pension/social security contribution rate (as a percentage)
 
-Respond with ONLY a JSON object: {"taxRate": <number>, "pensionRate": <number>}. No other text.`,
-            },
-          ],
-        }),
-      });
+Respond with ONLY a JSON object: {"taxRate": <number>, "pensionRate": <number>}. No other text.`;
 
-      if (response.ok) {
-        const data = await response.json();
-        const text = data.content[0].text;
-        const taxMatch = text.match(/"taxRate"\s*:\s*([\d.]+)/);
-        const pensionMatch = text.match(/"pensionRate"\s*:\s*([\d.]+)/);
-        if (taxMatch) {
-          return {
-            effectiveTaxRate: Math.round(parseFloat(taxMatch[1])),
-            pensionContributionPercent: pensionMatch ? Math.round(parseFloat(pensionMatch[1]) * 2) / 2 : 5,
-            country,
-          };
-        }
+    const text = await callAI(prompt);
+    if (text) {
+      const taxMatch = text.match(/"taxRate"\s*:\s*([\d.]+)/);
+      const pensionMatch = text.match(/"pensionRate"\s*:\s*([\d.]+)/);
+      if (taxMatch) {
+        return {
+          effectiveTaxRate: Math.round(parseFloat(taxMatch[1])),
+          pensionContributionPercent: pensionMatch ? Math.round(parseFloat(pensionMatch[1]) * 2) / 2 : 5,
+          country,
+        };
       }
-    } catch {
-      // fall through to default
     }
   }
 
@@ -414,54 +391,45 @@ Respond with ONLY a JSON object: {"taxRate": <number>, "pensionRate": <number>}.
   };
 }
 
+const SUPABASE_PROXY_URL = "https://knftyqkhampkqchoncel.supabase.co/functions/v1/estimate-price";
+
+function buildPricePrompt(description: string, category: string): string {
+  if (category === "hobby") {
+    return `Estimate the TOTAL ANNUAL cost in EUR for someone actively doing "${description}" as a regular hobby in Europe. This person does it EVERY WEEK or at least multiple times per month throughout the year. Include ALL yearly costs: club/gym membership, equipment purchase and replacement, lessons/coaching, travel to locations, gear maintenance, insurance, competition fees, consumables, permits/licenses. Add it ALL up for a full year. Be realistic — hobbies are expensive! For example: golf costs ~€3000/yr, sailing ~€4000/yr, horse riding ~€3500/yr, skydiving ~€3000/yr. Respond with ONLY: {"price": <number>}`;
+  }
+  return `You are a price estimation assistant. Estimate the current market price in EUR for: "${description}" (category: ${category}). Consider the European market. If this is a vintage, classic, or collector's item, price it at current collector market value, NOT original retail price. Respond with ONLY a JSON object: {"price": <number>}. No other text.`;
+}
+
+async function callAI(prompt: string): Promise<string | null> {
+  try {
+    const response = await fetch(SUPABASE_PROXY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.text ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function estimatePrice(
   description: string,
   category: string,
-  apiKey: string | null
+  _apiKey: string | null
 ): Promise<number> {
   if (!description.trim()) return getFallbackPrice(description, category);
 
-  if (!apiKey) {
-    // Brief delay so user sees the spinner (feels like research)
-    await new Promise(r => setTimeout(r, 600));
-    return getFallbackPrice(description, category);
-  }
-
-  try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 150,
-        messages: [
-          {
-            role: "user",
-            content: category === "hobby"
-              ? `Estimate the TOTAL ANNUAL cost in EUR for someone actively doing "${description}" as a regular hobby in Europe. This person does it EVERY WEEK or at least multiple times per month throughout the year. Include ALL yearly costs: club/gym membership, equipment purchase and replacement, lessons/coaching, travel to locations, gear maintenance, insurance, competition fees, consumables, permits/licenses. Add it ALL up for a full year. Be realistic — hobbies are expensive! For example: golf costs ~€3000/yr, sailing ~€4000/yr, horse riding ~€3500/yr, skydiving ~€3000/yr. Respond with ONLY: {"price": <number>}`
-              : `You are a price estimation assistant. Estimate the current market price in EUR for: "${description}" (category: ${category}). Consider the European market. If this is a vintage, classic, or collector's item, price it at current collector market value, NOT original retail price. Respond with ONLY a JSON object: {"price": <number>}. No other text.`,
-          },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      return getFallbackPrice(description, category);
-    }
-
-    const data = await response.json();
-    const text = data.content[0].text;
+  // Always try the Supabase proxy first (uses server-side API key)
+  const prompt = buildPricePrompt(description, category);
+  const text = await callAI(prompt);
+  if (text) {
     const match = text.match(/"price"\s*:\s*(\d+)/);
-    if (match) {
-      return parseInt(match[1], 10);
-    }
-    return getFallbackPrice(description, category);
-  } catch {
-    return getFallbackPrice(description, category);
+    if (match) return parseInt(match[1], 10);
   }
+
+  // Fallback to local database
+  return getFallbackPrice(description, category);
 }
