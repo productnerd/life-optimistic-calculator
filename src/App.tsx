@@ -160,12 +160,6 @@ function App() {
           </span>{" "}
           costs less than you think.
         </h2>
-        <p
-          className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto italic"
-          style={{ fontFamily: "'DM Sans', sans-serif" }}
-        >
-          You don't need to slave around to get your dream life.
-        </p>
       </section>
 
       <div className="w-full px-6">
